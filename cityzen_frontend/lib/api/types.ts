@@ -77,6 +77,7 @@ export type ReportCreateRequest = {
   area: string;
   location: string;
   file?: File | null;
+  files?: File[];
 };
 
 export type Report = {
@@ -88,6 +89,7 @@ export type Report = {
   area: string;
   location: string;
   file: string | null;
+  images: string[];
   status: "pending" | "in_review" | "approved" | "rejected";
   created_at: string;
   updated_at: string;

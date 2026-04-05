@@ -16,6 +16,9 @@ export function createReport(payload: ReportCreateRequest, token: string) {
   if (payload.file) {
     formData.append("file", payload.file);
   }
+  if (payload.files?.length) {
+    payload.files.slice(0, 3).forEach((image) => formData.append("upload_images", image));
+  }
 
   return apiRequest<Report>("/report/reports/", {
     method: "POST",
@@ -43,6 +46,9 @@ export function updateReport(
   if (payload.area !== undefined) formData.append("area", payload.area);
   if (payload.location !== undefined) formData.append("location", payload.location);
   if (payload.file) formData.append("file", payload.file);
+  if (payload.files?.length) {
+    payload.files.slice(0, 3).forEach((image) => formData.append("upload_images", image));
+  }
 
   return apiRequest<Report>(`/report/reports/${reportId}/`, {
     method: "PATCH",

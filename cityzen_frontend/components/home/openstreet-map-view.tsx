@@ -54,6 +54,7 @@ function createCategoryIcon(category: Report["category"]) {
 type OpenStreetMapViewProps = {
   reports: Report[];
   onLocationPick?: (lat: number, lng: number) => void;
+  onEditReport?: (report: Report) => void;
 };
 
 function MapClickPicker({ onPick }: { onPick?: (lat: number, lng: number) => void }) {
@@ -89,7 +90,7 @@ function parseLocation(location: string): [number, number] | null {
   return [parts[0], parts[1]];
 }
 
-export default function OpenStreetMapView({ reports, onLocationPick }: OpenStreetMapViewProps) {
+export default function OpenStreetMapView({ reports, onLocationPick, onEditReport }: OpenStreetMapViewProps) {
   const [detailsReport, setDetailsReport] = useState<Report | null>(null);
   const [comments, setComments] = useState<ReportComment[]>([]);
   const [commentInput, setCommentInput] = useState("");
@@ -122,6 +123,13 @@ export default function OpenStreetMapView({ reports, onLocationPick }: OpenStree
   function isImageFile(path: string | null) {
     if (!path) return false;
     return /\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(path);
+  }
+
+  function getReportImageUrls(report: Report) {
+    const imagePaths = report.images?.length ? report.images : report.file ? [report.file] : [];
+    return imagePaths
+      .map((path) => resolveFileUrl(path))
+      .filter((path): path is string => Boolean(path) && isImageFile(path));
   }
 
   function formatDate(dateString: string) {
@@ -212,8 +220,8 @@ export default function OpenStreetMapView({ reports, onLocationPick }: OpenStree
             const position = parseLocation(report.location);
             if (!position) return null;
 
-            const fileUrl = resolveFileUrl(report.file);
-            const hasImage = isImageFile(fileUrl);
+            const imageUrls = getReportImageUrls(report);
+            const hasImage = imageUrls.length > 0;
 
             return (
               <Marker key={report.id} position={position} icon={createCategoryIcon(report.category)}>
@@ -222,13 +230,16 @@ export default function OpenStreetMapView({ reports, onLocationPick }: OpenStree
                     <PopupCloseButton />
                     <h4 className="mb-2 text-[1rem] font-bold text-[#0f172a]">{report.title}</h4>
                     <p className="my-1 line-clamp-2 text-[0.86rem] text-[#334155]">{report.description}</p>
-                    {hasImage && fileUrl ? (
+                    {hasImage ? (
                       <img
-                        src={fileUrl}
+                        src={imageUrls[0]}
                         alt={`${report.title} preview`}
                         className="my-2 h-24 w-full rounded-lg border border-[#d4deee] object-cover"
                         loading="lazy"
                       />
+                    ) : null}
+                    {imageUrls.length > 1 ? (
+                      <p className="text-[0.76rem] font-semibold text-[#64748b]">+{imageUrls.length - 1} more image(s)</p>
                     ) : null}
                     <p className="my-1 text-[0.86rem] text-[#334155]">
                       <strong>Category:</strong>{" "}
@@ -262,6 +273,15 @@ export default function OpenStreetMapView({ reports, onLocationPick }: OpenStree
                     >
                       View full details
                     </button>
+                    {onEditReport ? (
+                      <button
+                        type="button"
+                        className="mt-2 ml-2 rounded-lg border border-[#c7d3e6] bg-[#edf2fa] px-2.5 py-1.5 font-bold text-[#2b456f] transition hover:bg-[#e1e9f6]"
+                        onClick={() => onEditReport(report)}
+                      >
+                        Edit
+                      </button>
+                    ) : null}
                   </div>
                 </Popup>
               </Marker>
@@ -303,31 +323,44 @@ export default function OpenStreetMapView({ reports, onLocationPick }: OpenStree
                   <p><strong>Category:</strong> {detailsReport.category}</p>
                   <p><strong>Status:</strong> {detailsReport.status}</p>
                   <p><strong>Location:</strong> {detailsReport.location}</p>
-                  {detailsReport.file ? (
-                    <div>
-                      {isImageFile(resolveFileUrl(detailsReport.file)) ? (
+                  {getReportImageUrls(detailsReport).length ? (
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {getReportImageUrls(detailsReport).slice(0, 3).map((imageUrl, index) => (
                         <img
-                          src={resolveFileUrl(detailsReport.file) as string}
-                          alt={`${detailsReport.title} attachment`}
+                          key={`${detailsReport.id}-image-${index}`}
+                          src={imageUrl}
+                          alt={`${detailsReport.title} image ${index + 1}`}
                           className="mt-1 max-h-[38vh] w-full rounded-xl border border-[#d4deee] object-cover"
                         />
-                      ) : (
-                        <a
-                          href={resolveFileUrl(detailsReport.file) as string}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex rounded-lg border border-[#c7d3e6] bg-[#edf2fa] px-2.5 py-1.5 font-semibold text-[#2b456f]"
-                        >
-                          Open attachment
-                        </a>
-                      )}
+                      ))}
                     </div>
+                  ) : detailsReport.file ? (
+                    <a
+                      href={resolveFileUrl(detailsReport.file) as string}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex rounded-lg border border-[#c7d3e6] bg-[#edf2fa] px-2.5 py-1.5 font-semibold text-[#2b456f]"
+                    >
+                      Open attachment
+                    </a>
                   ) : null}
                 </div>
 
                 <hr className="my-4 border-[#d7e0ee]" />
 
                 <section>
+                  {onEditReport ? (
+                    <button
+                      type="button"
+                      className="mb-3 rounded-lg border border-[#c7d3e6] bg-[#edf2fa] px-2.5 py-1.5 font-bold text-[#2b456f] transition hover:bg-[#e1e9f6]"
+                      onClick={() => {
+                        onEditReport(detailsReport);
+                        closeReportDetails();
+                      }}
+                    >
+                      Edit report
+                    </button>
+                  ) : null}
                   <h3 className="mb-2 text-[1rem] font-bold text-[#0f172a]">Comments</h3>
 
                   {commentError ? (

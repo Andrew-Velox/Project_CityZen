@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { refreshAccessToken } from "@/lib/api/auth";
-import { createReport, getReports } from "@/lib/api/report";
+import { createReport, getReports, updateReport } from "@/lib/api/report";
 import { getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token-store";
 import { ApiError, type Report } from "@/lib/api/types";
 
@@ -18,6 +18,8 @@ export function OpenStreetMapPanel() {
   const [loadingReports, setLoadingReports] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [editingReportId, setEditingReportId] = useState<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -26,8 +28,25 @@ export function OpenStreetMapPanel() {
     category: "warning" as "danger" | "help" | "warning" | "healthy",
     area: "",
     location: "",
-    file: null as File | null,
+    files: [] as File[],
   });
+
+  function setFileAt(index: number, file: File | null) {
+    setForm((prev) => {
+      const nextFiles: (File | null)[] = [null, null, null];
+
+      prev.files.slice(0, 3).forEach((existing, existingIndex) => {
+        nextFiles[existingIndex] = existing;
+      });
+
+      nextFiles[index] = file;
+
+      return {
+        ...prev,
+        files: nextFiles.filter((item): item is File => Boolean(item)),
+      };
+    });
+  }
 
   async function loadReports() {
     setLoadingReports(true);
@@ -75,11 +94,36 @@ export function OpenStreetMapPanel() {
       category: "warning",
       area: "",
       location: "",
-      file: null,
+      files: [],
     });
   }
 
+  function startCreate() {
+    setMode("create");
+    setEditingReportId(null);
+    setSubmitError(null);
+    resetForm();
+    setIsModalOpen(true);
+  }
+
+  function startEdit(report: Report) {
+    setMode("edit");
+    setEditingReportId(report.id);
+    setSubmitError(null);
+    setForm({
+      title: report.title,
+      description: report.description,
+      category: report.category,
+      area: report.area,
+      location: report.location,
+      files: [],
+    });
+    setIsModalOpen(true);
+  }
+
   function onMapPick(lat: number, lng: number) {
+    setMode("create");
+    setEditingReportId(null);
     setSubmitError(null);
     setForm((prev) => ({
       ...prev,
@@ -94,21 +138,40 @@ export function OpenStreetMapPanel() {
     setSubmitError(null);
 
     try {
-      await withAccessToken((token) =>
-        createReport(
-          {
-            title: form.title,
-            description: form.description,
-            category: form.category,
-            area: form.area,
-            location: form.location,
-            file: form.file,
-          },
-          token,
-        ),
-      );
+      if (mode === "edit" && editingReportId) {
+        await withAccessToken((token) =>
+          updateReport(
+            editingReportId,
+            {
+              title: form.title,
+              description: form.description,
+              category: form.category,
+              area: form.area,
+              location: form.location,
+              files: form.files.length ? form.files : undefined,
+            },
+            token,
+          ),
+        );
+      } else {
+        await withAccessToken((token) =>
+          createReport(
+            {
+              title: form.title,
+              description: form.description,
+              category: form.category,
+              area: form.area,
+              location: form.location,
+              files: form.files,
+            },
+            token,
+          ),
+        );
+      }
 
       setIsModalOpen(false);
+      setMode("create");
+      setEditingReportId(null);
       resetForm();
       await loadReports();
     } catch (err) {
@@ -142,7 +205,7 @@ export function OpenStreetMapPanel() {
       </div>
 
       <div className="relative mt-2 h-[clamp(360px,62vh,820px)] sm:h-[clamp(420px,66vh,820px)]">
-        <OpenStreetMapView reports={reports} onLocationPick={onMapPick} />
+        <OpenStreetMapView reports={reports} onLocationPick={onMapPick} onEditReport={startEdit} />
         {loadingReports ? (
           <p className="pointer-events-none absolute left-3 top-3 z-[600] rounded-xl border border-[#cfd9ea] bg-[#ffffffeb] px-2.5 py-1.5 text-[0.78rem] font-semibold text-[#304a72] shadow-[0_10px_24px_#12284d1a] sm:left-4 sm:top-4 sm:px-3 sm:py-2 sm:text-[0.82rem]">
             Loading reports...
@@ -152,10 +215,7 @@ export function OpenStreetMapPanel() {
         <button
           type="button"
           className="absolute bottom-4 right-3 z-[650] grid h-12 w-12 place-items-center rounded-full border border-[#5677c0] bg-gradient-to-br from-[#244892] to-[#1a3470] text-[1.6rem] font-bold leading-none text-[#ffffff] shadow-[0_14px_28px_#1326494d] sm:bottom-5 sm:right-4 sm:h-[54px] sm:w-[54px] sm:text-[1.9rem]"
-          onClick={() => {
-            setSubmitError(null);
-            setIsModalOpen(true);
-          }}
+          onClick={startCreate}
           aria-label="Create report"
         >
           <span>+</span>
@@ -177,7 +237,9 @@ export function OpenStreetMapPanel() {
             >
               <section className="w-[min(94vw,560px)] max-h-[92dvh] overflow-x-hidden overflow-y-auto rounded-[20px] border border-[#d2dbe9] bg-[#ffffff] p-3 shadow-[0_30px_64px_#12234533] sm:p-4 md:p-5">
                 <header className="mb-3 flex items-center justify-between gap-2">
-                  <h3 className="text-[1rem] font-bold text-[#0f172a] sm:text-[1.1rem]">Create report</h3>
+                  <h3 className="text-[1rem] font-bold text-[#0f172a] sm:text-[1.1rem]">
+                    {mode === "edit" ? "Edit report" : "Create report"}
+                  </h3>
                   <button
                     type="button"
                     className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#c7d3e6] bg-[#edf2fa] text-[1.2rem] font-bold leading-none text-[#2b456f]"
@@ -246,18 +308,49 @@ export function OpenStreetMapPanel() {
                     required
                   />
 
-                  <input
-                    type="file"
-                    className="w-full rounded-xl border border-[#d0d9e8] bg-[#fafcff] px-3.5 py-2.5 text-[0.92rem]"
-                    onChange={(event) => setForm((prev) => ({ ...prev, file: event.target.files?.[0] || null }))}
-                  />
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    <div>
+                      <label className="mb-1 block text-[0.78rem] font-semibold text-[#475569]">Image 1</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="w-full rounded-xl border border-[#d0d9e8] bg-[#fafcff] px-2.5 py-2 text-[0.86rem]"
+                        onChange={(event) => setFileAt(0, event.target.files?.[0] || null)}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[0.78rem] font-semibold text-[#475569]">Image 2</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="w-full rounded-xl border border-[#d0d9e8] bg-[#fafcff] px-2.5 py-2 text-[0.86rem]"
+                        onChange={(event) => setFileAt(1, event.target.files?.[0] || null)}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[0.78rem] font-semibold text-[#475569]">Image 3</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="w-full rounded-xl border border-[#d0d9e8] bg-[#fafcff] px-2.5 py-2 text-[0.86rem]"
+                        onChange={(event) => setFileAt(2, event.target.files?.[0] || null)}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[0.78rem] text-[#64748b]">Upload up to 3 images (one per field).</p>
 
                   <button
                     type="submit"
                     className="rounded-xl bg-[#1f4fd7] px-4 py-2.5 font-semibold text-[#ffffff] disabled:opacity-70"
                     disabled={submitting}
                   >
-                    {submitting ? "Submitting..." : "Submit report"}
+                    {submitting
+                      ? mode === "edit"
+                        ? "Updating..."
+                        : "Submitting..."
+                      : mode === "edit"
+                        ? "Update report"
+                        : "Submit report"}
                   </button>
                 </form>
               </section>

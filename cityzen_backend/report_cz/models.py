@@ -37,6 +37,18 @@ class Report(models.Model):
         return self.title
 
 
+class ReportImage(models.Model):
+    report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to="report_images/")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Image for report #{self.report_id}"
+
+
 class Comment(models.Model):
     report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="report_comments")
