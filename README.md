@@ -1,5 +1,19 @@
 # Project_CityZen
 
+
+## Run the backend server
+```bash
+cd cityzen_backend
+python -m venv .venv
+# Git Bash (Windows)
+source .venv/Scripts/activate
+# macOS/Linux
+# source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py runserver
+```
+
+
 - [ ] Backend Feature Checklist
     - [x] User signup
     - [x] User login
