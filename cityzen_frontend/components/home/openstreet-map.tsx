@@ -10,7 +10,11 @@ import { ApiError, type Report } from "@/lib/api/types";
 
 const OpenStreetMapView = dynamic(() => import("@/components/home/openstreet-map-view"), {
   ssr: false,
-  loading: () => <div className="map-loading">Loading map...</div>,
+  loading: () => (
+    <div className="mt-2 grid h-full min-h-0 place-items-center rounded-2xl border border-[#d7e2ff] bg-[linear-gradient(145deg,#f6f9ff_0%,#eef4ff_100%)] font-semibold text-[#334155]">
+      Loading map...
+    </div>
+  ),
 });
 
 export function OpenStreetMapPanel() {

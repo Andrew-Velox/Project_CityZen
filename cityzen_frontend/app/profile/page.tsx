@@ -33,7 +33,7 @@ type UpdateForm = {
 function FieldIcon({ kind }: { kind: "id" | "email" | "name" | "gender" | "birth" | "verified" }) {
   if (kind === "id") {
     return (
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="w-5 h-5">
         <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
         <path d="M7 10h6M7 14h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
@@ -42,7 +42,7 @@ function FieldIcon({ kind }: { kind: "id" | "email" | "name" | "gender" | "birth
 
   if (kind === "email") {
     return (
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="w-5 h-5">
         <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
         <path d="M4.5 7.5L12 13l7.5-5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
@@ -51,7 +51,7 @@ function FieldIcon({ kind }: { kind: "id" | "email" | "name" | "gender" | "birth
 
   if (kind === "name") {
     return (
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="w-5 h-5">
         <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.8" />
         <path d="M5 19c1.8-3.2 4.2-4.8 7-4.8s5.2 1.6 7 4.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
@@ -60,7 +60,7 @@ function FieldIcon({ kind }: { kind: "id" | "email" | "name" | "gender" | "birth
 
   if (kind === "gender") {
     return (
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="w-5 h-5">
         <circle cx="10" cy="14" r="4" stroke="currentColor" strokeWidth="1.8" />
         <path d="M14 10l5-5M15.5 5H19v3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -69,7 +69,7 @@ function FieldIcon({ kind }: { kind: "id" | "email" | "name" | "gender" | "birth
 
   if (kind === "birth") {
     return (
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="w-5 h-5">
         <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" strokeWidth="1.8" />
         <path d="M8 3.5v3M16 3.5v3M4 9h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
@@ -77,7 +77,7 @@ function FieldIcon({ kind }: { kind: "id" | "email" | "name" | "gender" | "birth
   }
 
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="w-5 h-5">
       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
       <path d="M8 12.4l2.5 2.5L16 9.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -87,23 +87,18 @@ function FieldIcon({ kind }: { kind: "id" | "email" | "name" | "gender" | "birth
 export default function ProfilePage() {
   const router = useRouter();
 
-  const shellClass =
-    "relative min-h-[calc(100dvh-5.5rem)] overflow-hidden bg-gradient-to-br from-[#f8fafd] via-[#eff3f9] to-[#e8eef7] px-4 py-8";
-  const overlayClass =
-    "pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(to_right,#d8dee8_1px,transparent_1px),linear-gradient(to_bottom,#d8dee8_1px,transparent_1px)] [background-size:32px_32px]";
-  const panelClass =
-    "relative z-[1] mx-auto w-full max-w-5xl rounded-3xl border border-[#d6dde8] bg-gradient-to-b from-[#ffffff] to-[#f9fbff] p-4 shadow-[0_22px_54px_#1123471f] md:p-7";
-  const primaryBtnClass =
-    "inline-flex min-h-11 items-center justify-center rounded-xl border border-transparent bg-gradient-to-br from-[#1f4fd7] to-[#173ea8] px-4 py-2 font-semibold text-[#ffffff] transition hover:-translate-y-[1px] hover:shadow-[0_12px_22px_#12295a36]";
-  const secondaryBtnClass =
-    "inline-flex min-h-11 items-center justify-center rounded-xl border border-transparent bg-gradient-to-br from-[#2f5c7c] to-[#254c67] px-4 py-2 font-semibold text-[#ffffff] transition hover:-translate-y-[1px]";
-  const dangerBtnClass =
-    "inline-flex min-h-11 items-center justify-center rounded-xl border border-transparent bg-[#b9382c] px-4 py-2 font-semibold text-[#ffffff] transition hover:bg-[#952f25]";
-  const ghostBtnClass =
-    "inline-flex min-h-11 items-center justify-center rounded-xl border border-[#c7d3e6] bg-[#edf2fa] px-4 py-2 font-semibold text-[#2c4571] transition hover:bg-[#e1e9f6]";
-  const labelClass = "mb-1.5 block text-sm font-semibold text-[#1a2437]";
-  const inputClass =
-    "block min-h-[46px] w-full rounded-xl border border-[#d0d9e8] bg-[#fafcff] px-3.5 py-2.5 text-[0.96rem] text-[#0f172a] outline-none transition focus:border-[#1f4fd7] focus:bg-[#ffffff] focus:shadow-[0_0_0_4px_#1f4fd724]";
+  // Modernized Class Variables
+  const shellClass = "min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8 relative overflow-hidden";
+  const overlayClass = "pointer-events-none absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"; // Subtle texture if desired, or just an empty div
+  const panelClass = "relative z-10 mx-auto w-full max-w-4xl rounded-3xl bg-white shadow-xl ring-1 ring-slate-200 overflow-hidden";
+  
+  const primaryBtnClass = "inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50";
+  const secondaryBtnClass = "inline-flex items-center justify-center rounded-xl bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:ring-offset-2 disabled:opacity-50";
+  const dangerBtnClass = "inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 disabled:opacity-50";
+  const ghostBtnClass = "inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50";
+  
+  const labelClass = "mb-1.5 block text-sm font-medium text-slate-700";
+  const inputClass = "block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm";
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -333,9 +328,11 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <main className={shellClass}>
-        <div className={overlayClass} />
-        <section className={panelClass}>
-          <p className="m-0 font-semibold text-[#0f172a]">Loading profile...</p>
+        <section className={`${panelClass} p-8 flex items-center justify-center min-h-[400px]`}>
+          <div className="flex flex-col items-center gap-3 text-slate-500">
+             <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
+             <p className="font-medium">Loading profile...</p>
+          </div>
         </section>
       </main>
     );
@@ -344,11 +341,15 @@ export default function ProfilePage() {
   if (pageError) {
     return (
       <main className={shellClass}>
-        <div className={overlayClass} />
-        <section className={panelClass}>
-          <h1 className="m-0 text-[clamp(1.35rem,2.4vw,1.95rem)] font-bold leading-tight text-[#0b1220]">Profile unavailable</h1>
-          <p className="mt-2 text-[#526079]">{pageError}</p>
-          <div className="mt-4 flex flex-wrap gap-3">
+        <section className={`${panelClass} p-8 text-center`}>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+            <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">Profile unavailable</h1>
+          <p className="mt-2 text-slate-500">{pageError}</p>
+          <div className="mt-6 flex justify-center">
             <button type="button" onClick={logout} className={ghostBtnClass}>Log out</button>
           </div>
         </section>
@@ -359,9 +360,8 @@ export default function ProfilePage() {
   if (!profile) {
     return (
       <main className={shellClass}>
-        <div className={overlayClass} />
-        <section className={panelClass}>
-          <p className="m-0 font-semibold text-[#0f172a]">No profile data found.</p>
+        <section className={`${panelClass} p-8`}>
+          <p className="font-medium text-slate-600">No profile data found.</p>
         </section>
       </main>
     );
@@ -369,129 +369,179 @@ export default function ProfilePage() {
 
   return (
     <main className={shellClass}>
-      <div className={overlayClass} />
-
       <section className={panelClass}>
-        <div className="mb-4 h-[130px] rounded-2xl bg-gradient-to-br from-[#294d93] via-[#1d356f] to-[#305c7c]" />
+        {/* Banner Area */}
+        <div className="h-32 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600" />
 
-        <header className="mb-4 mt-[-58px] flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between">
-          {profile.image ? (
-            <Image
-              src={profile.image}
-              alt={profile.username}
-              width={112}
-              height={112}
-              className="h-28 w-28 rounded-full border-4 border-[#ffffff] bg-[#eef3f9] object-cover shadow-[0_10px_28px_#13274a33]"
-            />
-          ) : (
-            <div className="grid h-28 w-28 place-items-center rounded-full border-4 border-[#ffffff] bg-gradient-to-br from-[#2a4f99] to-[#1f3a75] text-[1.7rem] font-bold text-[#ffffff] shadow-[0_10px_28px_#13274a33]">
-              {displayName[0]?.toUpperCase() || "U"}
+        <div className="px-6 pb-8 sm:px-8">
+          <header className="-mt-12 mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-end gap-5">
+              {profile.image ? (
+                <Image
+                  src={profile.image}
+                  alt={profile.username}
+                  width={112}
+                  height={112}
+                  className="h-28 w-28 rounded-full border-4 border-white bg-slate-100 object-cover shadow-md"
+                />
+              ) : (
+                <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white bg-slate-200 text-4xl font-bold text-slate-500 shadow-md">
+                  {displayName[0]?.toUpperCase() || "U"}
+                </div>
+              )}
+
+              <div className="mb-1">
+                <span className="mb-2 inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                  CityZen
+                </span>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{displayName}</h1>
+                <p className="text-sm font-medium text-slate-500">@{profile.username}</p>
+              </div>
             </div>
-          )}
 
-          <div>
-            <p className="mb-2 inline-block rounded-full border border-[#d4ddea] bg-[#edf2fb] px-3 py-1 text-[0.75rem] font-semibold tracking-[0.045em] text-[#1a3f96]">CityZen</p>
-            <h1 className="m-0 text-[clamp(1.35rem,2.4vw,1.95rem)] font-bold leading-tight text-[#0b1220]">{displayName}</h1>
-            <p className="mt-1 text-[#526079]">@{profile.username}</p>
+            <button
+              type="button"
+              className={ghostBtnClass}
+              onClick={() => openModal("update")}
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="mr-2 h-4 w-4">
+                <path d="M4 20h4l10-10a2 2 0 10-4-4L4 16v4z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Edit Profile
+            </button>
+          </header>
+
+          {actionSuccess ? (
+            <div className="mb-6">
+              <AuthFeedback type="success" message={actionSuccess} />
+            </div>
+          ) : null}
+
+          {/* Details Grid */}
+          <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:bg-slate-100">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                <FieldIcon kind="id" />
+              </div>
+              <div>
+                <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">User ID</dt>
+                <dd className="mt-0.5 text-sm font-semibold text-slate-900">{profile.id}</dd>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:bg-slate-100">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                <FieldIcon kind="email" />
+              </div>
+              <div className="overflow-hidden">
+                <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">Email</dt>
+                <dd className="mt-0.5 truncate text-sm font-semibold text-slate-900">{profile.email || "-"}</dd>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:bg-slate-100">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <FieldIcon kind="name" />
+              </div>
+              <div>
+                <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">First Name</dt>
+                <dd className="mt-0.5 text-sm font-semibold text-slate-900">{profile.first_name || "-"}</dd>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:bg-slate-100">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-teal-100 text-teal-600">
+                <FieldIcon kind="name" />
+              </div>
+              <div>
+                <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">Last Name</dt>
+                <dd className="mt-0.5 text-sm font-semibold text-slate-900">{profile.last_name || "-"}</dd>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:bg-slate-100">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-100 text-purple-600">
+                <FieldIcon kind="gender" />
+              </div>
+              <div>
+                <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">Gender</dt>
+                <dd className="mt-0.5 text-sm font-semibold text-slate-900 capitalize">{profile.gender || "-"}</dd>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:bg-slate-100">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                <FieldIcon kind="birth" />
+              </div>
+              <div>
+                <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">Birth Date</dt>
+                <dd className="mt-0.5 text-sm font-semibold text-slate-900">{profile.birth_date || "-"}</dd>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:bg-slate-100">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+                <FieldIcon kind="verified" />
+              </div>
+              <div>
+                <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">Status</dt>
+                <dd className="mt-0.5 text-sm font-semibold text-slate-900">{profile.is_verified ? "Verified" : "Unverified"}</dd>
+              </div>
+            </div>
           </div>
 
-          <button
-            type="button"
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#c8d3e6] bg-[#eef3fa] px-4 py-2 font-bold text-[#2b456d] transition hover:bg-[#e3ebf7]"
-            onClick={() => openModal("update")}
-          >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M4 20h4l10-10a2 2 0 10-4-4L4 16v4z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Edit profile
-          </button>
-        </header>
-
-        {actionSuccess ? <AuthFeedback type="success" message={actionSuccess} /> : null}
-
-        <dl className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
-            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="id" /></span>
-            <dt>User ID</dt>
-            <dd>{profile.id}</dd>
+          <div className="flex flex-wrap gap-3 border-t border-slate-200 pt-6">
+            <button type="button" className={primaryBtnClass} onClick={() => openModal("update")}>Update Profile</button>
+            <button type="button" className={secondaryBtnClass} onClick={() => openModal("password")}>Change Password</button>
+            <button type="button" className={ghostBtnClass} onClick={logout}>Log Out</button>
+            <div className="flex-1" /> {/* Spacer */}
+            <button type="button" className={dangerBtnClass} onClick={() => openModal("delete")}>Delete Account</button>
           </div>
-          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
-            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="email" /></span>
-            <dt>Email</dt>
-            <dd>{profile.email || "-"}</dd>
-          </div>
-          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
-            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="name" /></span>
-            <dt>First name</dt>
-            <dd>{profile.first_name || "-"}</dd>
-          </div>
-          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
-            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="name" /></span>
-            <dt>Last name</dt>
-            <dd>{profile.last_name || "-"}</dd>
-          </div>
-          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
-            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="gender" /></span>
-            <dt>Gender</dt>
-            <dd>{profile.gender || "-"}</dd>
-          </div>
-          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
-            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="birth" /></span>
-            <dt>Birth date</dt>
-            <dd>{profile.birth_date || "-"}</dd>
-          </div>
-          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
-            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="verified" /></span>
-            <dt>Verified</dt>
-            <dd>{profile.is_verified ? "Yes" : "No"}</dd>
-          </div>
-        </dl>
-
-        <div className="mt-4 flex flex-wrap gap-3">
-          <button type="button" className={primaryBtnClass} onClick={() => openModal("update")}>Update profile</button>
-          <button type="button" className={secondaryBtnClass} onClick={() => openModal("password")}>Change password</button>
-          <button type="button" className={dangerBtnClass} onClick={() => openModal("delete")}>Delete account</button>
-          <button type="button" className={ghostBtnClass} onClick={logout}>Log out</button>
         </div>
       </section>
 
+      {/* Modals */}
       {activeModal ? (
-        <div
-          className="fixed inset-0 z-[5000] grid place-items-center bg-[#111d356b] p-4 backdrop-blur-[3px]"
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm transition-opacity"
           role="dialog"
           aria-modal="true"
         >
-          <section className="relative z-[5001] w-full max-w-[620px] rounded-[20px] border border-[#d2dbe9] bg-gradient-to-b from-[#ffffff] to-[#f8fbff] p-4 shadow-[0_30px_64px_#12234533] md:p-5">
-            <header className="mb-3 flex items-center justify-between gap-3">
-              <h2>
-                {activeModal === "update" ? "Update profile" : ""}
-                {activeModal === "password" ? "Change password" : ""}
-                {activeModal === "delete" ? "Delete account" : ""}
+          <section className="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-200 sm:p-8">
+            <header className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-900">
+                {activeModal === "update" ? "Update Profile" : ""}
+                {activeModal === "password" ? "Change Password" : ""}
+                {activeModal === "delete" ? "Delete Account" : ""}
               </h2>
               <button
                 type="button"
-                className="inline-flex min-h-[38px] items-center justify-center rounded-xl border border-[#c7d3e6] bg-[#edf2fa] px-3 py-1.5 font-semibold text-[#2b456f]"
+                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500"
                 onClick={closeModal}
                 disabled={busy}
               >
-                Close
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </header>
 
-            {actionError ? <AuthFeedback type="error" message={actionError} /> : null}
+            {actionError ? (
+               <div className="mb-5">
+                 <AuthFeedback type="error" message={actionError} />
+               </div>
+            ) : null}
 
             {activeModal === "update" ? (
-              <form className="grid gap-3.5" onSubmit={onUpdateSubmit}>
-                <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
+              <form className="flex flex-col gap-5" onSubmit={onUpdateSubmit}>
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <div>
                     <label htmlFor="first_name" className={labelClass}>First name</label>
                     <input
                       id="first_name"
                       className={inputClass}
                       value={updateForm.first_name}
-                      onChange={(event) =>
-                        setUpdateForm((prev) => ({ ...prev, first_name: event.target.value }))
-                      }
+                      onChange={(event) => setUpdateForm((prev) => ({ ...prev, first_name: event.target.value }))}
                       required
                     />
                   </div>
@@ -501,26 +551,24 @@ export default function ProfilePage() {
                       id="last_name"
                       className={inputClass}
                       value={updateForm.last_name}
-                      onChange={(event) =>
-                        setUpdateForm((prev) => ({ ...prev, last_name: event.target.value }))
-                      }
+                      onChange={(event) => setUpdateForm((prev) => ({ ...prev, last_name: event.target.value }))}
                     />
                   </div>
                 </div>
 
-                <label htmlFor="email" className={labelClass}>Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  className={inputClass}
-                  value={updateForm.email}
-                  onChange={(event) =>
-                    setUpdateForm((prev) => ({ ...prev, email: event.target.value }))
-                  }
-                  required
-                />
+                <div>
+                  <label htmlFor="email" className={labelClass}>Email</label>
+                  <input
+                    id="email"
+                    type="email"
+                    className={inputClass}
+                    value={updateForm.email}
+                    onChange={(event) => setUpdateForm((prev) => ({ ...prev, email: event.target.value }))}
+                    required
+                  />
+                </div>
 
-                <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <div>
                     <label htmlFor="birth_date" className={labelClass}>Birth date</label>
                     <input
@@ -528,9 +576,7 @@ export default function ProfilePage() {
                       type="date"
                       className={inputClass}
                       value={updateForm.birth_date}
-                      onChange={(event) =>
-                        setUpdateForm((prev) => ({ ...prev, birth_date: event.target.value }))
-                      }
+                      onChange={(event) => setUpdateForm((prev) => ({ ...prev, birth_date: event.target.value }))}
                     />
                   </div>
                   <div>
@@ -539,9 +585,7 @@ export default function ProfilePage() {
                       id="gender"
                       className={inputClass}
                       value={updateForm.gender}
-                      onChange={(event) =>
-                        setUpdateForm((prev) => ({ ...prev, gender: event.target.value }))
-                      }
+                      onChange={(event) => setUpdateForm((prev) => ({ ...prev, gender: event.target.value }))}
                     >
                       <option value="">Prefer not to say</option>
                       <option value="male">Male</option>
@@ -551,77 +595,87 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <label htmlFor="image" className={labelClass}>Profile image (optional)</label>
-                <input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  className={inputClass}
-                  onChange={(event) =>
-                    setUpdateForm((prev) => ({
-                      ...prev,
-                      image: event.target.files?.[0] || null,
-                    }))
-                  }
-                />
+                <div>
+                  <label htmlFor="image" className={labelClass}>Profile image (optional)</label>
+                  <input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    className="block w-full text-sm text-slate-500 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 focus:outline-none"
+                    onChange={(event) => setUpdateForm((prev) => ({ ...prev, image: event.target.files?.[0] || null }))}
+                  />
+                </div>
 
-                <button type="submit" className={primaryBtnClass} disabled={busy}>
-                  {busy ? "Saving..." : "Save changes"}
-                </button>
+                <div className="mt-2 flex justify-end gap-3">
+                  <button type="button" className={ghostBtnClass} onClick={closeModal} disabled={busy}>Cancel</button>
+                  <button type="submit" className={primaryBtnClass} disabled={busy}>
+                    {busy ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
               </form>
             ) : null}
 
             {activeModal === "password" ? (
-              <form className="grid gap-3.5" onSubmit={onPasswordSubmit}>
-                <label htmlFor="new_password" className={labelClass}>New password</label>
-                <input
-                  id="new_password"
-                  type="password"
-                  className={inputClass}
-                  value={passwordForm.new_password}
-                  onChange={(event) =>
-                    setPasswordForm((prev) => ({ ...prev, new_password: event.target.value }))
-                  }
-                  required
-                />
+              <form className="flex flex-col gap-5" onSubmit={onPasswordSubmit}>
+                <div>
+                  <label htmlFor="new_password" className={labelClass}>New password</label>
+                  <input
+                    id="new_password"
+                    type="password"
+                    className={inputClass}
+                    value={passwordForm.new_password}
+                    onChange={(event) => setPasswordForm((prev) => ({ ...prev, new_password: event.target.value }))}
+                    required
+                  />
+                </div>
 
-                <label htmlFor="confirm_password" className={labelClass}>Confirm new password</label>
-                <input
-                  id="confirm_password"
-                  type="password"
-                  className={inputClass}
-                  value={passwordForm.confirm_password}
-                  onChange={(event) =>
-                    setPasswordForm((prev) => ({ ...prev, confirm_password: event.target.value }))
-                  }
-                  required
-                />
+                <div>
+                  <label htmlFor="confirm_password" className={labelClass}>Confirm new password</label>
+                  <input
+                    id="confirm_password"
+                    type="password"
+                    className={inputClass}
+                    value={passwordForm.confirm_password}
+                    onChange={(event) => setPasswordForm((prev) => ({ ...prev, confirm_password: event.target.value }))}
+                    required
+                  />
+                </div>
 
-                <button type="submit" className={primaryBtnClass} disabled={busy}>
-                  {busy ? "Updating..." : "Update password"}
-                </button>
+                <div className="mt-2 flex justify-end gap-3">
+                  <button type="button" className={ghostBtnClass} onClick={closeModal} disabled={busy}>Cancel</button>
+                  <button type="submit" className={primaryBtnClass} disabled={busy}>
+                    {busy ? "Updating..." : "Update Password"}
+                  </button>
+                </div>
               </form>
             ) : null}
 
             {activeModal === "delete" ? (
-              <form className="grid gap-3.5" onSubmit={onDeleteSubmit}>
-                <p className="m-0 rounded-xl border border-[#f4c8c1] bg-[#fff2ef] p-3 text-[#b9382c]">
-                  This action is permanent. Enter your current password to confirm account deletion.
-                </p>
+              <form className="flex flex-col gap-5" onSubmit={onDeleteSubmit}>
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+                  <p className="text-sm text-red-800">
+                    <strong>Warning:</strong> This action is permanent and cannot be undone. Enter your current password to confirm account deletion.
+                  </p>
+                </div>
 
-                <label htmlFor="delete_password" className={labelClass}>Current password</label>
-                <input
-                  id="delete_password"
-                  type="password"
-                  className={inputClass}
-                  value={deletePassword}
-                  onChange={(event) => setDeletePassword(event.target.value)}
-                  required
-                />
+                <div>
+                  <label htmlFor="delete_password" className={labelClass}>Current password</label>
+                  <input
+                    id="delete_password"
+                    type="password"
+                    className={inputClass}
+                    value={deletePassword}
+                    onChange={(event) => setDeletePassword(event.target.value)}
+                    required
+                  />
+                </div>
 
-                <button type="submit" className={dangerBtnClass} disabled={busy}>
-                  {busy ? "Deleting..." : "Delete my account"}
-                </button>
+                <div className="mt-2 flex justify-end gap-3">
+                  <button type="button" className={ghostBtnClass} onClick={closeModal} disabled={busy}>Cancel</button>
+                  <button type="submit" className={dangerBtnClass} disabled={busy}>
+                    {busy ? "Deleting..." : "Permanently Delete Account"}
+                  </button>
+                </div>
               </form>
             ) : null}
           </section>
