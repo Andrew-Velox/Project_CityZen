@@ -69,3 +69,26 @@ export type ChangePasswordRequest = {
 export type DeleteAccountRequest = {
   password: string;
 };
+
+export type ReportCreateRequest = {
+  title: string;
+  description: string;
+  category: "danger" | "help" | "warning" | "healthy";
+  area: string;
+  location: string;
+  file?: File | null;
+};
+
+export type Report = {
+  id: number;
+  author: string;
+  title: string;
+  description: string;
+  category: "danger" | "help" | "warning" | "healthy";
+  area: string;
+  location: string;
+  file: string | null;
+  status: "pending" | "in_review" | "approved" | "rejected";
+  created_at: string;
+  updated_at: string;
+};

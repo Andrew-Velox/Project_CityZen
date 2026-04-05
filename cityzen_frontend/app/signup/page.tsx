@@ -20,6 +20,12 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const labelClass = "mb-1.5 block text-sm font-semibold text-[#1a2437]";
+  const inputClass =
+    "block min-h-12 w-full rounded-xl border border-[#d0d9e8] bg-[#fafcff] px-3.5 py-2.5 text-[0.96rem] text-[#0f172a] outline-none transition focus:border-[#1f4fd7] focus:bg-[#ffffff] focus:shadow-[0_0_0_4px_#1f4fd724]";
+  const buttonClass =
+    "inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-transparent bg-gradient-to-br from-[#1f4fd7] to-[#173ea8] px-4 py-2 font-semibold text-[#ffffff] transition hover:-translate-y-[1px] hover:shadow-[0_12px_22px_#12295a36] disabled:cursor-not-allowed disabled:opacity-70 disabled:shadow-none";
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -60,13 +66,14 @@ export default function SignupPage() {
       footerCtaLabel="Sign in"
       footerHref="/login"
     >
-      <form className="auth-form" onSubmit={onSubmit}>
-        <div className="auth-row">
+      <form className="grid gap-4" onSubmit={onSubmit}>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label htmlFor="first_name">First name</label>
+            <label htmlFor="first_name" className={labelClass}>First name</label>
             <input
               id="first_name"
               name="first_name"
+              className={inputClass}
               autoComplete="given-name"
               value={form.first_name}
               onChange={(event) => updateField("first_name", event.target.value)}
@@ -75,10 +82,11 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="last_name">Last name</label>
+            <label htmlFor="last_name" className={labelClass}>Last name</label>
             <input
               id="last_name"
               name="last_name"
+              className={inputClass}
               autoComplete="family-name"
               value={form.last_name}
               onChange={(event) => updateField("last_name", event.target.value)}
@@ -86,34 +94,37 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <label htmlFor="username">Username</label>
+        <label htmlFor="username" className={labelClass}>Username</label>
         <input
           id="username"
           name="username"
+          className={inputClass}
           autoComplete="username"
           value={form.username}
           onChange={(event) => updateField("username", event.target.value)}
           required
         />
 
-        <label htmlFor="email">Email</label>
+        <label htmlFor="email" className={labelClass}>Email</label>
         <input
           id="email"
           name="email"
           type="email"
+          className={inputClass}
           autoComplete="email"
           value={form.email}
           onChange={(event) => updateField("email", event.target.value)}
           required
         />
 
-        <div className="auth-row">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password" className={labelClass}>Password</label>
             <input
               id="password"
               name="password"
               type="password"
+              className={inputClass}
               autoComplete="new-password"
               value={form.password}
               onChange={(event) => updateField("password", event.target.value)}
@@ -122,11 +133,12 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="confirm_password">Confirm password</label>
+            <label htmlFor="confirm_password" className={labelClass}>Confirm password</label>
             <input
               id="confirm_password"
               name="confirm_password"
               type="password"
+              className={inputClass}
               autoComplete="new-password"
               value={form.confirm_password}
               onChange={(event) => updateField("confirm_password", event.target.value)}
@@ -138,7 +150,7 @@ export default function SignupPage() {
         {error ? <AuthFeedback type="error" message={error} /> : null}
         {success ? <AuthFeedback type="success" message={success} /> : null}
 
-        <button type="submit" disabled={isLoading}>
+        <button type="submit" disabled={isLoading} className={buttonClass}>
           {isLoading ? "Creating account..." : "Create account"}
         </button>
       </form>

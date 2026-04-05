@@ -24,7 +24,7 @@ class Category(models.Model):
 
 
 class BlogPost(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts', to_field='username')
     title = models.CharField(max_length=200)
     featured_image = models.ImageField(upload_to='blog_images/', null=True, blank=True)
     category = models.ManyToManyField(Category, blank=True, related_name='blog_posts')

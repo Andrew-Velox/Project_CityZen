@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   changeMyPassword,
@@ -85,6 +86,24 @@ function FieldIcon({ kind }: { kind: "id" | "email" | "name" | "gender" | "birth
 
 export default function ProfilePage() {
   const router = useRouter();
+
+  const shellClass =
+    "relative min-h-dvh overflow-hidden bg-gradient-to-br from-[#f8fafd] via-[#eff3f9] to-[#e8eef7] px-4 py-8";
+  const overlayClass =
+    "pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(to_right,#d8dee8_1px,transparent_1px),linear-gradient(to_bottom,#d8dee8_1px,transparent_1px)] [background-size:32px_32px]";
+  const panelClass =
+    "relative z-[1] mx-auto w-full max-w-5xl rounded-3xl border border-[#d6dde8] bg-gradient-to-b from-[#ffffff] to-[#f9fbff] p-4 shadow-[0_22px_54px_#1123471f] md:p-7";
+  const primaryBtnClass =
+    "inline-flex min-h-11 items-center justify-center rounded-xl border border-transparent bg-gradient-to-br from-[#1f4fd7] to-[#173ea8] px-4 py-2 font-semibold text-[#ffffff] transition hover:-translate-y-[1px] hover:shadow-[0_12px_22px_#12295a36]";
+  const secondaryBtnClass =
+    "inline-flex min-h-11 items-center justify-center rounded-xl border border-transparent bg-gradient-to-br from-[#2f5c7c] to-[#254c67] px-4 py-2 font-semibold text-[#ffffff] transition hover:-translate-y-[1px]";
+  const dangerBtnClass =
+    "inline-flex min-h-11 items-center justify-center rounded-xl border border-transparent bg-[#b9382c] px-4 py-2 font-semibold text-[#ffffff] transition hover:bg-[#952f25]";
+  const ghostBtnClass =
+    "inline-flex min-h-11 items-center justify-center rounded-xl border border-[#c7d3e6] bg-[#edf2fa] px-4 py-2 font-semibold text-[#2c4571] transition hover:bg-[#e1e9f6]";
+  const labelClass = "mb-1.5 block text-sm font-semibold text-[#1a2437]";
+  const inputClass =
+    "block min-h-[46px] w-full rounded-xl border border-[#d0d9e8] bg-[#fafcff] px-3.5 py-2.5 text-[0.96rem] text-[#0f172a] outline-none transition focus:border-[#1f4fd7] focus:bg-[#ffffff] focus:shadow-[0_0_0_4px_#1f4fd724]";
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -313,10 +332,10 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="profile-theme-shell">
-        <div className="auth-grid-overlay" />
-        <section className="profile-theme-card profile-panel relative z-[1]">
-          <p className="profile-strong">Loading profile...</p>
+      <main className={shellClass}>
+        <div className={overlayClass} />
+        <section className={panelClass}>
+          <p className="m-0 font-semibold text-[#0f172a]">Loading profile...</p>
         </section>
       </main>
     );
@@ -324,13 +343,13 @@ export default function ProfilePage() {
 
   if (pageError) {
     return (
-      <main className="profile-theme-shell">
-        <div className="auth-grid-overlay" />
-        <section className="profile-theme-card profile-panel relative z-[1]">
-          <h1 className="profile-title">Profile unavailable</h1>
-          <p className="profile-muted">{pageError}</p>
-          <div className="profile-actions">
-            <button type="button" onClick={logout}>Log out</button>
+      <main className={shellClass}>
+        <div className={overlayClass} />
+        <section className={panelClass}>
+          <h1 className="m-0 text-[clamp(1.35rem,2.4vw,1.95rem)] font-bold leading-tight text-[#0b1220]">Profile unavailable</h1>
+          <p className="mt-2 text-[#526079]">{pageError}</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button type="button" onClick={logout} className={ghostBtnClass}>Log out</button>
           </div>
         </section>
       </main>
@@ -339,38 +358,48 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <main className="profile-theme-shell">
-        <div className="auth-grid-overlay" />
-        <section className="profile-theme-card profile-panel relative z-[1]">
-          <p className="profile-strong">No profile data found.</p>
+      <main className={shellClass}>
+        <div className={overlayClass} />
+        <section className={panelClass}>
+          <p className="m-0 font-semibold text-[#0f172a]">No profile data found.</p>
         </section>
       </main>
     );
   }
 
   return (
-    <main className="profile-theme-shell">
-      <div className="auth-grid-overlay" />
+    <main className={shellClass}>
+      <div className={overlayClass} />
 
-      <section className="profile-theme-card profile-panel relative z-[1]">
-        <div className="profile-hero" />
+      <section className={panelClass}>
+        <div className="mb-4 h-[130px] rounded-2xl bg-gradient-to-br from-[#294d93] via-[#1d356f] to-[#305c7c]" />
 
-        <header className="profile-header-core">
+        <header className="mb-4 mt-[-58px] flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between">
           {profile.image ? (
-            <img src={profile.image} alt={profile.username} className="profile-avatar" />
+            <Image
+              src={profile.image}
+              alt={profile.username}
+              width={112}
+              height={112}
+              className="h-28 w-28 rounded-full border-4 border-[#ffffff] bg-[#eef3f9] object-cover shadow-[0_10px_28px_#13274a33]"
+            />
           ) : (
-            <div className="profile-avatar profile-avatar-fallback">
+            <div className="grid h-28 w-28 place-items-center rounded-full border-4 border-[#ffffff] bg-gradient-to-br from-[#2a4f99] to-[#1f3a75] text-[1.7rem] font-bold text-[#ffffff] shadow-[0_10px_28px_#13274a33]">
               {displayName[0]?.toUpperCase() || "U"}
             </div>
           )}
 
           <div>
-            <p className="auth-badge">CityZen</p>
-            <h1 className="profile-title">{displayName}</h1>
-            <p className="profile-muted">@{profile.username}</p>
+            <p className="mb-2 inline-block rounded-full border border-[#d4ddea] bg-[#edf2fb] px-3 py-1 text-[0.75rem] font-semibold tracking-[0.045em] text-[#1a3f96]">CityZen</p>
+            <h1 className="m-0 text-[clamp(1.35rem,2.4vw,1.95rem)] font-bold leading-tight text-[#0b1220]">{displayName}</h1>
+            <p className="mt-1 text-[#526079]">@{profile.username}</p>
           </div>
 
-          <button type="button" className="profile-quick-edit" onClick={() => openModal("update")}>
+          <button
+            type="button"
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#c8d3e6] bg-[#eef3fa] px-4 py-2 font-bold text-[#2b456d] transition hover:bg-[#e3ebf7]"
+            onClick={() => openModal("update")}
+          >
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4 20h4l10-10a2 2 0 10-4-4L4 16v4z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -380,73 +409,85 @@ export default function ProfilePage() {
 
         {actionSuccess ? <AuthFeedback type="success" message={actionSuccess} /> : null}
 
-        <dl className="dashboard-grid">
-          <div className="profile-item">
-            <span className="profile-item-icon"><FieldIcon kind="id" /></span>
+        <dl className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
+            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="id" /></span>
             <dt>User ID</dt>
             <dd>{profile.id}</dd>
           </div>
-          <div className="profile-item">
-            <span className="profile-item-icon"><FieldIcon kind="email" /></span>
+          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
+            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="email" /></span>
             <dt>Email</dt>
             <dd>{profile.email || "-"}</dd>
           </div>
-          <div className="profile-item">
-            <span className="profile-item-icon"><FieldIcon kind="name" /></span>
+          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
+            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="name" /></span>
             <dt>First name</dt>
             <dd>{profile.first_name || "-"}</dd>
           </div>
-          <div className="profile-item">
-            <span className="profile-item-icon"><FieldIcon kind="name" /></span>
+          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
+            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="name" /></span>
             <dt>Last name</dt>
             <dd>{profile.last_name || "-"}</dd>
           </div>
-          <div className="profile-item">
-            <span className="profile-item-icon"><FieldIcon kind="gender" /></span>
+          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
+            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="gender" /></span>
             <dt>Gender</dt>
             <dd>{profile.gender || "-"}</dd>
           </div>
-          <div className="profile-item">
-            <span className="profile-item-icon"><FieldIcon kind="birth" /></span>
+          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
+            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="birth" /></span>
             <dt>Birth date</dt>
             <dd>{profile.birth_date || "-"}</dd>
           </div>
-          <div className="profile-item">
-            <span className="profile-item-icon"><FieldIcon kind="verified" /></span>
+          <div className="relative rounded-2xl border border-[#d4ddea] bg-gradient-to-b from-[#fbfcff] to-[#f5f8fd] px-4 py-3 pl-12">
+            <span className="absolute left-3.5 top-3.5 h-5 w-5 text-[#2b4c8d]"><FieldIcon kind="verified" /></span>
             <dt>Verified</dt>
             <dd>{profile.is_verified ? "Yes" : "No"}</dd>
           </div>
         </dl>
 
-        <div className="profile-actions">
-          <button type="button" className="profile-cta" onClick={() => openModal("update")}>Update profile</button>
-          <button type="button" className="profile-cta profile-cta-secondary" onClick={() => openModal("password")}>Change password</button>
-          <button type="button" className="profile-cta profile-cta-danger" onClick={() => openModal("delete")}>Delete account</button>
-          <button type="button" className="profile-cta profile-cta-ghost" onClick={logout}>Log out</button>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button type="button" className={primaryBtnClass} onClick={() => openModal("update")}>Update profile</button>
+          <button type="button" className={secondaryBtnClass} onClick={() => openModal("password")}>Change password</button>
+          <button type="button" className={dangerBtnClass} onClick={() => openModal("delete")}>Delete account</button>
+          <button type="button" className={ghostBtnClass} onClick={logout}>Log out</button>
         </div>
       </section>
 
       {activeModal ? (
-        <div className="modal-overlay" role="dialog" aria-modal="true">
-          <section className="modal-card">
-            <header className="modal-header">
+        <div
+          className="fixed inset-0 z-[5000] grid place-items-center bg-[#111d356b] p-4 backdrop-blur-[3px]"
+          role="dialog"
+          aria-modal="true"
+        >
+          <section className="relative z-[5001] w-full max-w-[620px] rounded-[20px] border border-[#d2dbe9] bg-gradient-to-b from-[#ffffff] to-[#f8fbff] p-4 shadow-[0_30px_64px_#12234533] md:p-5">
+            <header className="mb-3 flex items-center justify-between gap-3">
               <h2>
                 {activeModal === "update" ? "Update profile" : ""}
                 {activeModal === "password" ? "Change password" : ""}
                 {activeModal === "delete" ? "Delete account" : ""}
               </h2>
-              <button type="button" className="close-btn" onClick={closeModal} disabled={busy}>Close</button>
+              <button
+                type="button"
+                className="inline-flex min-h-[38px] items-center justify-center rounded-xl border border-[#c7d3e6] bg-[#edf2fa] px-3 py-1.5 font-semibold text-[#2b456f]"
+                onClick={closeModal}
+                disabled={busy}
+              >
+                Close
+              </button>
             </header>
 
             {actionError ? <AuthFeedback type="error" message={actionError} /> : null}
 
             {activeModal === "update" ? (
-              <form className="modal-form" onSubmit={onUpdateSubmit}>
-                <div className="modal-row">
+              <form className="grid gap-3.5" onSubmit={onUpdateSubmit}>
+                <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
                   <div>
-                    <label htmlFor="first_name">First name</label>
+                    <label htmlFor="first_name" className={labelClass}>First name</label>
                     <input
                       id="first_name"
+                      className={inputClass}
                       value={updateForm.first_name}
                       onChange={(event) =>
                         setUpdateForm((prev) => ({ ...prev, first_name: event.target.value }))
@@ -455,9 +496,10 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="last_name">Last name</label>
+                    <label htmlFor="last_name" className={labelClass}>Last name</label>
                     <input
                       id="last_name"
+                      className={inputClass}
                       value={updateForm.last_name}
                       onChange={(event) =>
                         setUpdateForm((prev) => ({ ...prev, last_name: event.target.value }))
@@ -466,10 +508,11 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email" className={labelClass}>Email</label>
                 <input
                   id="email"
                   type="email"
+                  className={inputClass}
                   value={updateForm.email}
                   onChange={(event) =>
                     setUpdateForm((prev) => ({ ...prev, email: event.target.value }))
@@ -477,12 +520,13 @@ export default function ProfilePage() {
                   required
                 />
 
-                <div className="modal-row">
+                <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
                   <div>
-                    <label htmlFor="birth_date">Birth date</label>
+                    <label htmlFor="birth_date" className={labelClass}>Birth date</label>
                     <input
                       id="birth_date"
                       type="date"
+                      className={inputClass}
                       value={updateForm.birth_date}
                       onChange={(event) =>
                         setUpdateForm((prev) => ({ ...prev, birth_date: event.target.value }))
@@ -490,9 +534,10 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="gender">Gender</label>
+                    <label htmlFor="gender" className={labelClass}>Gender</label>
                     <select
                       id="gender"
+                      className={inputClass}
                       value={updateForm.gender}
                       onChange={(event) =>
                         setUpdateForm((prev) => ({ ...prev, gender: event.target.value }))
@@ -506,11 +551,12 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <label htmlFor="image">Profile image (optional)</label>
+                <label htmlFor="image" className={labelClass}>Profile image (optional)</label>
                 <input
                   id="image"
                   type="file"
                   accept="image/*"
+                  className={inputClass}
                   onChange={(event) =>
                     setUpdateForm((prev) => ({
                       ...prev,
@@ -519,18 +565,19 @@ export default function ProfilePage() {
                   }
                 />
 
-                <button type="submit" disabled={busy}>
+                <button type="submit" className={primaryBtnClass} disabled={busy}>
                   {busy ? "Saving..." : "Save changes"}
                 </button>
               </form>
             ) : null}
 
             {activeModal === "password" ? (
-              <form className="modal-form" onSubmit={onPasswordSubmit}>
-                <label htmlFor="new_password">New password</label>
+              <form className="grid gap-3.5" onSubmit={onPasswordSubmit}>
+                <label htmlFor="new_password" className={labelClass}>New password</label>
                 <input
                   id="new_password"
                   type="password"
+                  className={inputClass}
                   value={passwordForm.new_password}
                   onChange={(event) =>
                     setPasswordForm((prev) => ({ ...prev, new_password: event.target.value }))
@@ -538,10 +585,11 @@ export default function ProfilePage() {
                   required
                 />
 
-                <label htmlFor="confirm_password">Confirm new password</label>
+                <label htmlFor="confirm_password" className={labelClass}>Confirm new password</label>
                 <input
                   id="confirm_password"
                   type="password"
+                  className={inputClass}
                   value={passwordForm.confirm_password}
                   onChange={(event) =>
                     setPasswordForm((prev) => ({ ...prev, confirm_password: event.target.value }))
@@ -549,28 +597,29 @@ export default function ProfilePage() {
                   required
                 />
 
-                <button type="submit" disabled={busy}>
+                <button type="submit" className={primaryBtnClass} disabled={busy}>
                   {busy ? "Updating..." : "Update password"}
                 </button>
               </form>
             ) : null}
 
             {activeModal === "delete" ? (
-              <form className="modal-form" onSubmit={onDeleteSubmit}>
-                <p className="modal-warning">
+              <form className="grid gap-3.5" onSubmit={onDeleteSubmit}>
+                <p className="m-0 rounded-xl border border-[#f4c8c1] bg-[#fff2ef] p-3 text-[#b9382c]">
                   This action is permanent. Enter your current password to confirm account deletion.
                 </p>
 
-                <label htmlFor="delete_password">Current password</label>
+                <label htmlFor="delete_password" className={labelClass}>Current password</label>
                 <input
                   id="delete_password"
                   type="password"
+                  className={inputClass}
                   value={deletePassword}
                   onChange={(event) => setDeletePassword(event.target.value)}
                   required
                 />
 
-                <button type="submit" className="danger-btn" disabled={busy}>
+                <button type="submit" className={dangerBtnClass} disabled={busy}>
                   {busy ? "Deleting..." : "Delete my account"}
                 </button>
               </form>

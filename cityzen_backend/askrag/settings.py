@@ -42,9 +42,8 @@ INSTALLED_APPS = [
     'django_filters',
 
 
-    'rag_service',
     'rag_user',
-    'rag_blog',
+    'report_cz',
 
 ]
 
