@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import L from "leaflet";
 import {
   MapContainer,
@@ -72,6 +72,21 @@ function RefreshMapSize() {
   return null;
 }
 
+type RecenterOnSelectionProps = {
+  selectedPosition: [number, number] | null;
+};
+
+function RecenterOnSelection({ selectedPosition }: RecenterOnSelectionProps) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!selectedPosition) return;
+    map.flyTo(selectedPosition, Math.max(map.getZoom(), 15), { duration: 0.8 });
+  }, [map, selectedPosition]);
+
+  return null;
+}
+
 type LocationPickerProps = {
   onPick: (lat: number, lng: number) => void;
 };
@@ -101,6 +116,8 @@ export default function OpenStreetMapView({
   currentUsername,
   onEditReport,
 }: OpenStreetMapViewProps) {
+  const [isMapReady, setIsMapReady] = useState(false);
+
   useEffect(() => {
     // Ensure marker icons work in Next.js build output.
     delete (L.Icon.Default.prototype as L.Icon.Default & { _getIconUrl?: unknown })._getIconUrl;
@@ -121,7 +138,7 @@ export default function OpenStreetMapView({
 
   return (
     <div
-      className="mt-3 h-full overflow-hidden rounded-2xl border border-[#d1dbea] shadow-[inset_0_1px_0_#ffffff]"
+      className="mt-3 h-full min-h-0 overflow-hidden rounded-2xl border border-[#d1dbea] shadow-[inset_0_1px_0_#ffffff]"
       role="region"
       aria-label="Map viewport"
     >
@@ -131,13 +148,17 @@ export default function OpenStreetMapView({
         scrollWheelZoom
         className="h-full w-full min-h-0"
         style={{ height: "100%", width: "100%" }}
+        whenReady={() => setIsMapReady(true)}
       >
         <RefreshMapSize />
+        <RecenterOnSelection selectedPosition={selectedPosition} />
         <LocationPicker onPick={onLocationPick} />
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        {isMapReady ? (
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+        ) : null}
         <Marker position={dhakaPosition}>
           <Popup>CityZen default location: Dhaka</Popup>
         </Marker>

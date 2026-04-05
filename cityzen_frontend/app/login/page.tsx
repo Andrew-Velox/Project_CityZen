@@ -29,7 +29,7 @@ export default function LoginPage() {
     try {
       const response = await login({ username, password });
       setTokens(response.access, response.refresh);
-      router.push("/dashboard");
+      router.push("/profile");
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message || "Login failed. Check your credentials.");

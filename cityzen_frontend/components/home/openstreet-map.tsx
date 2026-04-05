@@ -27,6 +27,8 @@ export function OpenStreetMapPanel() {
   const [reports, setReports] = useState<Report[]>([]);
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
   const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(null);
+  const [latInput, setLatInput] = useState("");
+  const [lngInput, setLngInput] = useState("");
 
   const [form, setForm] = useState({
     title: "",
@@ -110,8 +112,19 @@ export function OpenStreetMapPanel() {
     setMode("create");
     setEditingReportId(null);
     setShowLocationOptions(true);
+    setLatInput("");
+    setLngInput("");
     setForm({ title: "", description: "", category: "warning", area: "", location: "", file: null });
     setIsModalOpen(true);
+  }
+
+  function setLocationFromCoordinates(lat: number, lng: number, precise = false) {
+    const latText = precise ? String(lat) : lat.toFixed(6);
+    const lngText = precise ? String(lng) : lng.toFixed(6);
+    setLatInput(latText);
+    setLngInput(lngText);
+    setForm((prev) => ({ ...prev, location: `${latText}, ${lngText}` }));
+    setSelectedPosition([lat, lng]);
   }
 
   function closeModal() {
@@ -120,12 +133,10 @@ export function OpenStreetMapPanel() {
   }
 
   function onMapPick(lat: number, lng: number) {
-    const formatted = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    setSelectedPosition([lat, lng]);
-    setForm((prev) => ({ ...prev, location: formatted }));
+    setLocationFromCoordinates(lat, lng);
     setMapPickNotice(null);
     setAwaitingMapPick(false);
-    setShowLocationOptions(mode === "create" ? false : true);
+    setShowLocationOptions(true);
     setLocationMode("map");
     setIsModalOpen(true);
   }
@@ -136,7 +147,7 @@ export function OpenStreetMapPanel() {
     setError(null);
     setSuccess(null);
     setMapPickNotice(null);
-    setShowLocationOptions(false);
+    setShowLocationOptions(true);
     setForm({
       title: report.title,
       description: report.description,
@@ -148,13 +159,26 @@ export function OpenStreetMapPanel() {
 
     const parts = report.location.split(",").map((part) => Number.parseFloat(part.trim()));
     if (parts.length === 2 && !Number.isNaN(parts[0]) && !Number.isNaN(parts[1])) {
-      setSelectedPosition([parts[0], parts[1]]);
+      setLocationFromCoordinates(parts[0], parts[1]);
+    } else {
+      setLatInput("");
+      setLngInput("");
+      setSelectedPosition(null);
     }
 
     setIsModalOpen(true);
   }
 
   async function useGpsLocation() {
+    setAwaitingMapPick(false);
+    setMapPickNotice(null);
+    setShowLocationOptions(true);
+
+    if (!window.isSecureContext) {
+      setError("GPS requires a secure context (HTTPS or localhost).");
+      return;
+    }
+
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by your browser.");
       return;
@@ -168,28 +192,81 @@ export function OpenStreetMapPanel() {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
-          timeout: 10000,
+          timeout: 15000,
           maximumAge: 0,
         });
       });
 
+      // Avoid filling clearly unreliable coarse positions.
+      if (position.coords.accuracy > 1500) {
+        setError("GPS signal is too weak for an accurate location. Please try again or use map pick.");
+        return;
+      }
+
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
-      setSelectedPosition([lat, lng]);
-      setForm((prev) => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
-    } catch {
-      setError("Unable to get GPS location. Please allow location access.");
+      setLocationFromCoordinates(lat, lng, true);
+      setMapPickNotice("GPS location captured successfully.");
+    } catch (err) {
+      const geoErr = err as GeolocationPositionError | undefined;
+
+      if (geoErr?.code === 1) {
+        if ("permissions" in navigator && navigator.permissions?.query) {
+          try {
+            const result = await navigator.permissions.query({ name: "geolocation" as PermissionName });
+            if (result.state === "granted") {
+              setError("Site permission is enabled, but device location services are off or blocked. Turn on OS location and try again.");
+            } else {
+              setError("Location permission denied. Please allow location access in your browser settings.");
+            }
+          } catch {
+            setError("Location permission denied. Please allow location access in your browser settings.");
+          }
+        } else {
+          setError("Location permission denied. Please allow location access in your browser settings.");
+        }
+      } else if (geoErr?.code === 2) {
+        setError("Location is currently unavailable. Try again from an open area or use map pick.");
+      } else if (geoErr?.code === 3) {
+        setError("Location request timed out. Please try again or use map pick.");
+      } else {
+        setError("Unable to get GPS location. Please try again or use map pick.");
+      }
     } finally {
       setLocating(false);
     }
   }
 
-  function pickFromMap() {
+  function pickFromMap(customNotice?: string) {
     setLocationMode("map");
     setError(null);
     setAwaitingMapPick(true);
-    setMapPickNotice("Map pick mode enabled. Click any point on the map.");
+    setMapPickNotice(customNotice || "Map pick mode enabled. Click any point on the map.");
     setIsModalOpen(false);
+  }
+
+  function onLatChange(value: string) {
+    setLatInput(value);
+    const lat = Number.parseFloat(value);
+    const lng = Number.parseFloat(lngInput);
+    if (Number.isNaN(lat) || Number.isNaN(lng)) {
+      setForm((prev) => ({ ...prev, location: "" }));
+      return;
+    }
+    setForm((prev) => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
+    setSelectedPosition([lat, lng]);
+  }
+
+  function onLngChange(value: string) {
+    setLngInput(value);
+    const lat = Number.parseFloat(latInput);
+    const lng = Number.parseFloat(value);
+    if (Number.isNaN(lat) || Number.isNaN(lng)) {
+      setForm((prev) => ({ ...prev, location: "" }));
+      return;
+    }
+    setForm((prev) => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
+    setSelectedPosition([lat, lng]);
   }
 
   async function onSubmitReport(event: FormEvent<HTMLFormElement>) {
@@ -254,7 +331,7 @@ export function OpenStreetMapPanel() {
 
   return (
     <section
-      className="relative z-[1] mt-3 flex min-h-0 flex-1 flex-col rounded-3xl border border-[#d3dbe8] bg-gradient-to-b from-[#ffffff] to-[#f8fafd] p-4 shadow-[0_24px_56px_#1428481f] md:p-5"
+      className="relative mt-3 flex min-h-0 flex-1 flex-col rounded-3xl border border-[#d3dbe8] bg-gradient-to-b from-[#ffffff] to-[#f8fafd] p-4 shadow-[0_24px_56px_#1428481f] md:p-5"
       aria-label="City map section"
     >
       <div>
@@ -274,7 +351,7 @@ export function OpenStreetMapPanel() {
         ) : null}
       </div>
 
-      <div className="relative mt-2 h-[420px] md:h-[62vh] md:min-h-[520px]">
+      <div className="relative mt-2 h-[clamp(440px,68vh,820px)]">
         <OpenStreetMapView
           selectedPosition={selectedPosition}
           onLocationPick={onMapPick}
@@ -303,6 +380,11 @@ export function OpenStreetMapPanel() {
           role="dialog"
           aria-modal="true"
           aria-label="Create report modal"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeModal();
+            }
+          }}
         >
           <section className="relative z-[5001] w-full max-w-[620px] rounded-[20px] border border-[#d2dbe9] bg-gradient-to-b from-[#ffffff] to-[#f8fbff] p-4 shadow-[0_30px_64px_#12234533] md:p-5">
             <header className="mb-3 flex items-center justify-between gap-3">
@@ -359,7 +441,7 @@ export function OpenStreetMapPanel() {
                 <option value="healthy">Healthy</option>
               </select>
 
-              <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3.5 lg:grid-cols-2">
                 <div>
                   <label htmlFor="report-area" className={labelClass}>Area</label>
                   <input
@@ -374,32 +456,32 @@ export function OpenStreetMapPanel() {
                   <label htmlFor="report-location" className={labelClass}>Location</label>
 
                   {showLocationOptions ? (
-                    <div className="mb-2 grid grid-cols-2 gap-2" role="group" aria-label="Choose location source">
+                    <div className="mb-2 grid grid-cols-2 gap-2.5" role="group" aria-label="Choose location source">
                       <button
                         type="button"
-                        className={`inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl border px-2 py-2 font-bold transition ${locationMode === "gps" ? "border-[#9eb0ce] bg-gradient-to-b from-[#e7edf8] to-[#dde6f4] text-[#213a66]" : "border-[#cdd6e6] bg-gradient-to-b from-[#f7f9fd] to-[#edf2fa] text-[#2e456f] hover:-translate-y-[1px] hover:bg-gradient-to-b hover:from-[#eef3fa] hover:to-[#e5ecf8]"}`}
+                        className={`inline-flex min-h-[62px] items-center justify-start gap-2.5 rounded-xl border px-3 py-2.5 text-left font-bold transition ${locationMode === "gps" ? "border-[#90a7cb] bg-gradient-to-b from-[#e6edf9] to-[#dae5f6] text-[#203d70] shadow-[inset_0_1px_0_#ffffff]" : "border-[#cdd6e6] bg-gradient-to-b from-[#f7f9fd] to-[#edf2fa] text-[#2e456f] hover:-translate-y-[1px] hover:bg-gradient-to-b hover:from-[#eef3fa] hover:to-[#e5ecf8]"}`}
                         onClick={useGpsLocation}
                         disabled={locating || submitting}
                       >
-                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                           <path d="M12 4v3M12 17v3M4 12h3M17 12h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                           <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8" />
                           <circle cx="12" cy="12" r="1.8" fill="currentColor" />
                         </svg>
-                        {locating ? "Locating..." : "GPS Location"}
+                        <span className="leading-tight">{locating ? "Locating..." : "GPS Location"}</span>
                       </button>
 
                       <button
                         type="button"
-                        className={`inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl border px-2 py-2 font-bold transition ${locationMode === "map" ? "border-[#9eb0ce] bg-gradient-to-b from-[#e7edf8] to-[#dde6f4] text-[#213a66]" : "border-[#cdd6e6] bg-gradient-to-b from-[#f7f9fd] to-[#edf2fa] text-[#2e456f] hover:-translate-y-[1px] hover:bg-gradient-to-b hover:from-[#eef3fa] hover:to-[#e5ecf8]"}`}
-                        onClick={pickFromMap}
+                        className={`inline-flex min-h-[62px] items-center justify-start gap-2.5 rounded-xl border px-3 py-2.5 text-left font-bold transition ${locationMode === "map" ? "border-[#90a7cb] bg-gradient-to-b from-[#e6edf9] to-[#dae5f6] text-[#203d70] shadow-[inset_0_1px_0_#ffffff]" : "border-[#cdd6e6] bg-gradient-to-b from-[#f7f9fd] to-[#edf2fa] text-[#2e456f] hover:-translate-y-[1px] hover:bg-gradient-to-b hover:from-[#eef3fa] hover:to-[#e5ecf8]"}`}
+                        onClick={() => pickFromMap()}
                         disabled={submitting}
                       >
-                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <svg className="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                           <path d="M12 21s6-5.8 6-10a6 6 0 10-12 0c0 4.2 6 10 6 10z" stroke="currentColor" strokeWidth="1.8" />
                           <circle cx="12" cy="11" r="2.2" fill="currentColor" />
                         </svg>
-                        Pick From Map
+                        <span className="leading-tight">Pick From Map</span>
                       </button>
                     </div>
                   ) : (
@@ -408,16 +490,25 @@ export function OpenStreetMapPanel() {
                     </p>
                   )}
 
-                  <input
-                    id="report-location"
-                    className={inputClass}
-                    value={form.location}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, location: event.target.value }))
-                    }
-                    placeholder="GPS or map coordinates"
-                    required
-                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      id="report-location"
+                      className={inputClass}
+                      value={latInput}
+                      onChange={(event) => onLatChange(event.target.value)}
+                      placeholder="Latitude"
+                      inputMode="decimal"
+                      required
+                    />
+                    <input
+                      className={inputClass}
+                      value={lngInput}
+                      onChange={(event) => onLngChange(event.target.value)}
+                      placeholder="Longitude"
+                      inputMode="decimal"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 

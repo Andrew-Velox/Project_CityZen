@@ -88,7 +88,7 @@ export default function ProfilePage() {
   const router = useRouter();
 
   const shellClass =
-    "relative min-h-dvh overflow-hidden bg-gradient-to-br from-[#f8fafd] via-[#eff3f9] to-[#e8eef7] px-4 py-8";
+    "relative min-h-[calc(100dvh-5.5rem)] overflow-hidden bg-gradient-to-br from-[#f8fafd] via-[#eff3f9] to-[#e8eef7] px-4 py-8";
   const overlayClass =
     "pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(to_right,#d8dee8_1px,transparent_1px),linear-gradient(to_bottom,#d8dee8_1px,transparent_1px)] [background-size:32px_32px]";
   const panelClass =

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
+import { CityNavbar } from "@/components/home/city-navbar";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
@@ -29,7 +30,12 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col">{children}</body>
+      <body suppressHydrationWarning className="flex min-h-dvh flex-col overflow-x-hidden">
+        <div className="relative z-[2500] px-3 pt-3 md:px-4 md:pt-4">
+          <CityNavbar />
+        </div>
+        <div className="min-h-0 flex-1">{children}</div>
+      </body>
     </html>
   );
 }

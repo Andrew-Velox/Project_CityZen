@@ -19,7 +19,7 @@ export function AuthShell({
   footerHref,
 }: AuthShellProps) {
   return (
-    <div className="relative grid min-h-dvh place-items-center overflow-hidden bg-gradient-to-br from-[#f8fafd] via-[#eff3f9] to-[#e8eef7] px-4 py-8">
+    <div className="relative grid min-h-[calc(100dvh-5.5rem)] place-items-center overflow-hidden bg-gradient-to-br from-[#f8fafd] via-[#eff3f9] to-[#e8eef7] px-4 py-8">
       <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(to_right,#d8dee8_1px,transparent_1px),linear-gradient(to_bottom,#d8dee8_1px,transparent_1px)] [background-size:32px_32px]" />
       <main
         className="relative z-[1] w-full max-w-2xl rounded-3xl border border-[#d6dde8] bg-gradient-to-b from-[#ffffff] to-[#f9fbff] p-6 shadow-[0_22px_54px_#1123471f] md:p-9"
