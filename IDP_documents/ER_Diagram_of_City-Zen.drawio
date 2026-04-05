@@ -1,0 +1,70 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Cityzen ERD" id="5ueFqDwWNTDThy5R07sW">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="User&lt;br&gt;----------------&lt;br&gt;user_id (PK)&lt;br&gt;username&lt;br&gt;email&lt;div&gt;gender&lt;/div&gt;&lt;div&gt;age&lt;/div&gt;&lt;div&gt;password&lt;br&gt;phone&lt;br&gt;area location&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="200" width="220" x="60" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Post&lt;br&gt;----------------&lt;br&gt;Post_id (PK)&lt;br&gt;title&lt;br&gt;description&lt;div&gt;area&lt;br&gt;location&lt;div&gt;file&lt;br&gt;status&lt;br&gt;created_at&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="220" width="240" x="50" y="-230" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Comment&#xa;----------------&#xa;comment_id (PK)&#xa;content&#xa;created_at" vertex="1">
+          <mxGeometry height="160" width="220" x="-300" y="-200" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Reply&lt;br&gt;----------------&lt;br&gt;reply_id (PK)&lt;br&gt;&lt;div&gt;content&lt;br&gt;created_at&lt;/div&gt;" vertex="1">
+          <mxGeometry height="160" width="220" x="-300" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="CommunityMessage&#xa;----------------&#xa;message_id (PK)&#xa;user_id (FK)&#xa;area&#xa;content&#xa;timestamp" vertex="1">
+          <mxGeometry height="180" width="240" x="50" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Map (Area/Full Country)&lt;br&gt;----------------&lt;br&gt;area_id (PK)&lt;div&gt;post_id (FK)&lt;/div&gt;&lt;div&gt;&lt;div&gt;name&lt;br&gt;city&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="140" width="200" x="430" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Building (RAJUK)&lt;br&gt;----------------&lt;br&gt;building_id (PK)&lt;br&gt;holding_number&lt;br&gt;area&lt;br&gt;approval_status" vertex="1">
+          <mxGeometry height="200" width="260" x="790" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-8" edge="1" parent="1" source="GxcaeUnEIx1p9U1lzEzm-1" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" target="GxcaeUnEIx1p9U1lzEzm-2" value="Reports 1:N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-9" edge="1" parent="1" source="GxcaeUnEIx1p9U1lzEzm-2" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" target="GxcaeUnEIx1p9U1lzEzm-3" value="Has 1:N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-10" edge="1" parent="1" source="GxcaeUnEIx1p9U1lzEzm-3" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" target="GxcaeUnEIx1p9U1lzEzm-4" value="Has 1:N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-11" edge="1" parent="1" source="GxcaeUnEIx1p9U1lzEzm-1" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" target="GxcaeUnEIx1p9U1lzEzm-5" value="Sends 1:N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-12" edge="1" parent="1" source="GxcaeUnEIx1p9U1lzEzm-1" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" target="GxcaeUnEIx1p9U1lzEzm-6" value="Belongs To">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-13" edge="1" parent="1" source="GxcaeUnEIx1p9U1lzEzm-2" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" target="GxcaeUnEIx1p9U1lzEzm-6" value="Belongs To">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-14" edge="1" parent="1" source="GxcaeUnEIx1p9U1lzEzm-5" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" target="GxcaeUnEIx1p9U1lzEzm-6" value="Belongs To">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="GxcaeUnEIx1p9U1lzEzm-15" edge="1" parent="1" source="GxcaeUnEIx1p9U1lzEzm-7" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;" target="GxcaeUnEIx1p9U1lzEzm-6" value="Belongs To">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="G2IoNutoOHB3LAxNyItZ-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Registration&lt;br&gt;-----------------------&lt;br&gt;First name&lt;div&gt;last name&lt;/div&gt;&lt;div&gt;phone number&lt;/div&gt;&lt;div&gt;email&lt;/div&gt;&lt;div&gt;password&lt;/div&gt;&lt;div&gt;confirm pass&lt;/div&gt;" vertex="1">
+          <mxGeometry height="260" width="220" x="-500" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="G2IoNutoOHB3LAxNyItZ-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;div&gt;Login&lt;/div&gt;----------------&lt;br&gt;email&lt;div&gt;password&lt;/div&gt;" vertex="1">
+          <mxGeometry height="160" width="220" x="-500" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="Wta71p0y2H12c8oRKbnq-1" edge="1" parent="1" source="Wta71p0y2H12c8oRKbnq-2" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;entryX=0.448;entryY=-0.008;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.405;exitY=0.994;exitDx=0;exitDy=0;exitPerimeter=0;" target="GxcaeUnEIx1p9U1lzEzm-2" value="Has 1:N">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="280" y="-330" as="sourcePoint" />
+            <mxPoint x="150" y="-330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Wta71p0y2H12c8oRKbnq-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Voting system&lt;br&gt;----------------&lt;br&gt;Post_id (FK)&lt;div&gt;Up vote&lt;/div&gt;&lt;div&gt;down vote&lt;/div&gt;" vertex="1">
+          <mxGeometry height="160" width="220" x="190" y="-510" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
