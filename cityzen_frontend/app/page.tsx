@@ -1,20 +1,13 @@
-import Link from "next/link";
+import { CityNavbar } from "@/components/home/city-navbar";
+import { OpenStreetMapPanel } from "@/components/home/openstreet-map";
 
 export default function Home() {
   return (
-    <main className="dashboard-shell">
-      <section className="dashboard-card">
-        <p className="dashboard-label">CityZen Platform</p>
-        <h1>Authentication is now connected to DRF</h1>
-        <p>
-          Use the dedicated auth pages to sign up, log in, and enter the token-protected
-          dashboard.
-        </p>
-        <div className="home-actions">
-          <Link href="/login">Go to login</Link>
-          <Link href="/signup">Go to signup</Link>
-        </div>
-      </section>
+    <main className="home-shell">
+      <div className="auth-grid-overlay" />
+      <CityNavbar />
+
+      <OpenStreetMapPanel />
     </main>
   );
 }
