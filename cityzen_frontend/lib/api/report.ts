@@ -1,5 +1,10 @@
 import { apiRequest } from "@/lib/api/http";
-import type { Report, ReportCreateRequest } from "@/lib/api/types";
+import type {
+  Report,
+  ReportComment,
+  ReportCommentCreateRequest,
+  ReportCreateRequest,
+} from "@/lib/api/types";
 
 export function createReport(payload: ReportCreateRequest, token: string) {
   const formData = new FormData();
@@ -42,6 +47,24 @@ export function updateReport(
   return apiRequest<Report>(`/report/reports/${reportId}/`, {
     method: "PATCH",
     body: formData,
+    token,
+  });
+}
+
+export function getReportComments(reportId: number) {
+  return apiRequest<ReportComment[]>(`/report/reports/${reportId}/comments/`, {
+    method: "GET",
+  });
+}
+
+export function createReportComment(
+  reportId: number,
+  payload: ReportCommentCreateRequest,
+  token: string,
+) {
+  return apiRequest<ReportComment>(`/report/reports/${reportId}/comments/`, {
+    method: "POST",
+    body: payload,
     token,
   });
 }

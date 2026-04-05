@@ -92,3 +92,18 @@ export type Report = {
   created_at: string;
   updated_at: string;
 };
+
+export type ReportComment = {
+  id: number;
+  author: string;
+  report: number;
+  parent: number | null;
+  content: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ReportCommentCreateRequest = {
+  content: string;
+  parent?: number | null;
+};

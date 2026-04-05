@@ -1,13 +1,11 @@
 import { ApiError, type ApiErrorPayload } from "@/lib/api/types";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
-  "http://127.0.0.1:8000";
+import { API_BASE_URL } from "@/config/api";
 
 type RequestOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   body?: unknown | FormData;
   token?: string;
+  timeoutMs?: number;
 };
 
 export async function apiRequest<T>(
@@ -15,19 +13,38 @@ export async function apiRequest<T>(
   options: RequestOptions = {},
 ): Promise<T> {
   const isFormData = options.body instanceof FormData;
+  const controller = new AbortController();
+  const timeoutMs = options.timeoutMs ?? 12000;
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), timeoutMs);
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: options.method || "GET",
-    headers: {
-      ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
-      ...(isFormData ? {} : { "Content-Type": "application/json" }),
-    },
-    body: options.body
-      ? isFormData
+  const requestBody =
+    options.body === undefined
+      ? undefined
+      : isFormData
         ? options.body
-        : JSON.stringify(options.body)
-      : undefined,
-  });
+        : JSON.stringify(options.body);
+
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method: options.method || "GET",
+      headers: {
+        ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      },
+      body: requestBody,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new ApiError(`Request timed out after ${Math.round(timeoutMs / 1000)}s`, 408, null);
+    }
+
+    throw error;
+  } finally {
+    globalThis.clearTimeout(timeoutId);
+  }
 
   const isJson = response.headers.get("content-type")?.includes("application/json");
   const payload = isJson
