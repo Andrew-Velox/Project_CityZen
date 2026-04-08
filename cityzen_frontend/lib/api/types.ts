@@ -80,6 +80,20 @@ export type ReportCreateRequest = {
   files?: File[];
 };
 
+export type ReportImageItem = {
+  id: number;
+  url: string;
+  order: number;
+};
+
+export type ReportImageSlot =
+  | { kind: "existing"; id: number }
+  | { kind: "new" };
+
+export type ReportUpdateRequest = Partial<ReportCreateRequest> & {
+  image_slots?: ReportImageSlot[];
+};
+
 export type Report = {
   id: number;
   author: string;
@@ -90,6 +104,7 @@ export type Report = {
   location: string;
   file: string | null;
   images: string[];
+  image_items?: ReportImageItem[];
   status: "pending" | "in_review" | "approved" | "rejected";
   created_at: string;
   updated_at: string;

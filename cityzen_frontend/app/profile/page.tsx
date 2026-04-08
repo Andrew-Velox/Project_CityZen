@@ -10,7 +10,8 @@ import {
   refreshAccessToken,
   updateMyProfile,
 } from "@/lib/api/auth";
-import { ApiError, type UserProfile } from "@/lib/api/types";
+import { deleteReport, getReportsByUser, updateReport } from "@/lib/api/report";
+import { ApiError, type Report, type UserProfile } from "@/lib/api/types";
 import {
   clearTokens,
   getAccessToken,
@@ -18,6 +19,7 @@ import {
   setTokens,
 } from "@/lib/auth/token-store";
 import { AuthFeedback } from "@/components/auth/auth-feedback";
+import ReportEditModal, { type ReportEditSubmitPayload } from "@/components/report/report-edit-modal";
 
 type ActiveModal = "update" | "password" | "delete" | null;
 
@@ -89,7 +91,6 @@ export default function ProfilePage() {
 
   // Modernized Class Variables
   const shellClass = "min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8 relative overflow-hidden";
-  const overlayClass = "pointer-events-none absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"; // Subtle texture if desired, or just an empty div
   const panelClass = "relative z-10 mx-auto w-full max-w-4xl rounded-3xl bg-white shadow-xl ring-1 ring-slate-200 overflow-hidden";
   
   const primaryBtnClass = "inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50";
@@ -101,6 +102,9 @@ export default function ProfilePage() {
   const inputClass = "block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 placeholder-slate-400 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm";
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [myReports, setMyReports] = useState<Report[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [reportsError, setReportsError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
 
@@ -124,6 +128,88 @@ export default function ProfilePage() {
   });
 
   const [deletePassword, setDeletePassword] = useState("");
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [reportBusy, setReportBusy] = useState(false);
+  const [reportActionError, setReportActionError] = useState<string | null>(null);
+
+  async function loadMyReports(userId: number) {
+    setReportsLoading(true);
+    setReportsError(null);
+
+    try {
+      const reports = await getReportsByUser(userId);
+      setMyReports(reports);
+    } catch (err) {
+      setReportsError(err instanceof Error ? err.message : "Failed to load your reports.");
+    } finally {
+      setReportsLoading(false);
+    }
+  }
+
+  function openReportModal(report: Report) {
+    setSelectedReport(report);
+    setReportActionError(null);
+    setIsReportModalOpen(true);
+  }
+
+  function closeReportModal() {
+    if (reportBusy) return;
+    setIsReportModalOpen(false);
+    setSelectedReport(null);
+    setReportActionError(null);
+  }
+
+  async function onReportUpdateSubmit(payload: ReportEditSubmitPayload) {
+    if (!profile || !selectedReport) return;
+
+    setReportBusy(true);
+    setReportActionError(null);
+
+    try {
+      await withAccessToken((token) =>
+        updateReport(
+          selectedReport.id,
+          {
+            title: payload.title,
+            description: payload.description,
+            category: payload.category,
+            area: payload.area,
+            location: payload.location,
+            files: payload.files,
+            image_slots: payload.image_slots,
+          },
+          token,
+        ),
+      );
+
+      await loadMyReports(profile.id);
+      setActionSuccess("Report updated successfully.");
+      closeReportModal();
+    } catch (err) {
+      setReportActionError(err instanceof Error ? err.message : "Failed to update report.");
+    } finally {
+      setReportBusy(false);
+    }
+  }
+
+  async function onReportDelete() {
+    if (!profile || !selectedReport) return;
+
+    setReportBusy(true);
+    setReportActionError(null);
+
+    try {
+      await withAccessToken((token) => deleteReport(selectedReport.id, token));
+      await loadMyReports(profile.id);
+      setActionSuccess("Report deleted successfully.");
+      closeReportModal();
+    } catch (err) {
+      setReportActionError(err instanceof Error ? err.message : "Failed to delete report.");
+    } finally {
+      setReportBusy(false);
+    }
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -153,6 +239,8 @@ export default function ProfilePage() {
             gender: me.gender || "",
             image: null,
           });
+
+          await loadMyReports(me.id);
         }
       } catch (err) {
         const shouldTryRefresh =
@@ -183,6 +271,8 @@ export default function ProfilePage() {
               gender: me.gender || "",
               image: null,
             });
+
+            await loadMyReports(me.id);
           }
         } catch {
           clearTokens();
@@ -325,6 +415,18 @@ export default function ProfilePage() {
     ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || profile.username
     : "My Profile";
 
+  function prettyDate(dateValue: string) {
+    try {
+      return new Date(dateValue).toLocaleDateString();
+    } catch {
+      return dateValue;
+    }
+  }
+
+  function prettyLabel(value: string) {
+    return value.replace(/_/g, " ").replace(/^\w/, (char) => char.toUpperCase());
+  }
+
   if (loading) {
     return (
       <main className={shellClass}>
@@ -382,6 +484,7 @@ export default function ProfilePage() {
                   alt={profile.username}
                   width={112}
                   height={112}
+                  loading="eager"
                   className="h-28 w-28 rounded-full border-4 border-white bg-slate-100 object-cover shadow-md"
                 />
               ) : (
@@ -489,6 +592,64 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+
+          <section className="mb-8 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold text-slate-900">My Reports</h2>
+              <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                {myReports.length}
+              </span>
+            </div>
+
+            {reportsLoading ? (
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600" />
+                Loading your reports...
+              </div>
+            ) : null}
+
+            {!reportsLoading && reportsError ? (
+              <p className="text-sm font-medium text-red-600">{reportsError}</p>
+            ) : null}
+
+            {!reportsLoading && !reportsError && myReports.length === 0 ? (
+              <p className="text-sm text-slate-500">You have not submitted any reports yet.</p>
+            ) : null}
+
+            {!reportsLoading && !reportsError && myReports.length > 0 ? (
+              <ul className="space-y-3">
+                {myReports.map((report) => (
+                  <li key={report.id}>
+                    <button
+                      type="button"
+                      onClick={() => openReportModal(report)}
+                      className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-blue-200 hover:bg-blue-50/30"
+                    >
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-slate-900">{report.title}</h3>
+                        <p className="mt-1 text-sm text-slate-600">{report.description}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                          {prettyLabel(report.category)}
+                        </span>
+                        <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                          {prettyLabel(report.status)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-slate-500 sm:grid-cols-3">
+                      <p><span className="font-semibold text-slate-700">Area:</span> {report.area}</p>
+                      <p><span className="font-semibold text-slate-700">Location:</span> {report.location}</p>
+                      <p><span className="font-semibold text-slate-700">Created:</span> {prettyDate(report.created_at)}</p>
+                    </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </section>
 
           <div className="flex flex-wrap gap-3 border-t border-slate-200 pt-6">
             <button type="button" className={primaryBtnClass} onClick={() => openModal("update")}>Update Profile</button>
@@ -681,6 +842,16 @@ export default function ProfilePage() {
           </section>
         </div>
       ) : null}
+
+      <ReportEditModal
+        isOpen={isReportModalOpen}
+        busy={reportBusy}
+        error={reportActionError}
+        report={selectedReport}
+        onClose={closeReportModal}
+        onSubmit={onReportUpdateSubmit}
+        onDelete={onReportDelete}
+      />
     </main>
   );
 }

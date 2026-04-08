@@ -4,9 +4,10 @@ import { FormEvent, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { refreshAccessToken } from "@/lib/api/auth";
-import { createReport, getReports, updateReport } from "@/lib/api/report";
+import { createReport, deleteReport, getReports, updateReport } from "@/lib/api/report";
 import { getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token-store";
 import { ApiError, type Report } from "@/lib/api/types";
+import ReportEditModal, { type ReportEditSubmitPayload } from "@/components/report/report-edit-modal";
 
 const OpenStreetMapView = dynamic(() => import("@/components/home/openstreet-map-view"), {
   ssr: false,
@@ -21,11 +22,12 @@ export function OpenStreetMapPanel() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [mode, setMode] = useState<"create" | "edit">("create");
-  const [editingReportId, setEditingReportId] = useState<number | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingReport, setEditingReport] = useState<Report | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [createSubmitting, setCreateSubmitting] = useState(false);
+  const [editSubmitting, setEditSubmitting] = useState(false);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -103,85 +105,101 @@ export function OpenStreetMapPanel() {
   }
 
   function startCreate() {
-    setMode("create");
-    setEditingReportId(null);
-    setSubmitError(null);
+    setCreateError(null);
     resetForm();
-    setIsModalOpen(true);
+    setIsCreateModalOpen(true);
   }
 
   function startEdit(report: Report) {
-    setMode("edit");
-    setEditingReportId(report.id);
-    setSubmitError(null);
-    setForm({
-      title: report.title,
-      description: report.description,
-      category: report.category,
-      area: report.area,
-      location: report.location,
-      files: [],
-    });
-    setIsModalOpen(true);
+    setEditError(null);
+    setEditingReport(report);
   }
 
   function onMapPick(lat: number, lng: number) {
-    setMode("create");
-    setEditingReportId(null);
-    setSubmitError(null);
+    setCreateError(null);
     setForm((prev) => ({
       ...prev,
       location: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
     }));
-    setIsModalOpen(true);
+    setIsCreateModalOpen(true);
   }
 
   async function onSubmitReport(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitting(true);
-    setSubmitError(null);
+    setCreateSubmitting(true);
+    setCreateError(null);
 
     try {
-      if (mode === "edit" && editingReportId) {
-        await withAccessToken((token) =>
-          updateReport(
-            editingReportId,
-            {
-              title: form.title,
-              description: form.description,
-              category: form.category,
-              area: form.area,
-              location: form.location,
-              files: form.files.length ? form.files : undefined,
-            },
-            token,
-          ),
-        );
-      } else {
-        await withAccessToken((token) =>
-          createReport(
-            {
-              title: form.title,
-              description: form.description,
-              category: form.category,
-              area: form.area,
-              location: form.location,
-              files: form.files,
-            },
-            token,
-          ),
-        );
-      }
+      await withAccessToken((token) =>
+        createReport(
+          {
+            title: form.title,
+            description: form.description,
+            category: form.category,
+            area: form.area,
+            location: form.location,
+            files: form.files,
+          },
+          token,
+        ),
+      );
 
-      setIsModalOpen(false);
-      setMode("create");
-      setEditingReportId(null);
+      setIsCreateModalOpen(false);
       resetForm();
       await loadReports();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to submit report.");
+      setCreateError(err instanceof Error ? err.message : "Failed to submit report.");
     } finally {
-      setSubmitting(false);
+      setCreateSubmitting(false);
+    }
+  }
+
+  async function onEditSubmit(payload: ReportEditSubmitPayload) {
+    if (!editingReport) return;
+
+    setEditSubmitting(true);
+    setEditError(null);
+
+    try {
+      await withAccessToken((token) =>
+        updateReport(
+          editingReport.id,
+          {
+            title: payload.title,
+            description: payload.description,
+            category: payload.category,
+            area: payload.area,
+            location: payload.location,
+            files: payload.files,
+            image_slots: payload.image_slots,
+          },
+          token,
+        ),
+      );
+
+      setEditingReport(null);
+      await loadReports();
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "Failed to update report.");
+    } finally {
+      setEditSubmitting(false);
+    }
+  }
+
+  async function onEditDelete() {
+    if (!editingReport) return;
+
+    setEditSubmitting(true);
+    setEditError(null);
+
+    try {
+      await withAccessToken((token) => deleteReport(editingReport.id, token));
+      setEditingReport(null);
+      await loadReports();
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "Failed to delete report.");
+    } finally {
+      setEditSubmitting(false);
     }
   }
 
@@ -226,7 +244,7 @@ export function OpenStreetMapPanel() {
         </button>
       </div>
 
-      {isModalOpen && typeof document !== "undefined"
+      {isCreateModalOpen && typeof document !== "undefined"
         ? createPortal(
             <div
               className="fixed inset-0 z-[11000] grid place-items-center overflow-x-hidden bg-[#111d356b] p-3 backdrop-blur-[3px] sm:p-4"
@@ -234,30 +252,28 @@ export function OpenStreetMapPanel() {
               aria-modal="true"
               aria-label="Create report"
               onMouseDown={(event) => {
-                if (event.target === event.currentTarget && !submitting) {
-                  setIsModalOpen(false);
+                if (event.target === event.currentTarget && !createSubmitting) {
+                  setIsCreateModalOpen(false);
                 }
               }}
             >
               <section className="w-[min(94vw,560px)] max-h-[92dvh] overflow-x-hidden overflow-y-auto rounded-[20px] border border-[#d2dbe9] bg-[#ffffff] p-3 shadow-[0_30px_64px_#12234533] sm:p-4 md:p-5">
                 <header className="mb-3 flex items-center justify-between gap-2">
-                  <h3 className="text-[1rem] font-bold text-[#0f172a] sm:text-[1.1rem]">
-                    {mode === "edit" ? "Edit report" : "Create report"}
-                  </h3>
+                  <h3 className="text-[1rem] font-bold text-[#0f172a] sm:text-[1.1rem]">Create report</h3>
                   <button
                     type="button"
                     className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#c7d3e6] bg-[#edf2fa] text-[1.2rem] font-bold leading-none text-[#2b456f]"
-                    onClick={() => setIsModalOpen(false)}
-                    disabled={submitting}
+                    onClick={() => setIsCreateModalOpen(false)}
+                    disabled={createSubmitting}
                     aria-label="Close modal"
                   >
                     ×
                   </button>
                 </header>
 
-                {submitError ? (
+                {createError ? (
                   <p className="mb-3 rounded-xl border border-[#f4c8c1] bg-[#fff2ef] px-3 py-2 text-sm font-semibold text-[#b9382c]">
-                    {submitError}
+                    {createError}
                   </p>
                 ) : null}
 
@@ -346,15 +362,9 @@ export function OpenStreetMapPanel() {
                   <button
                     type="submit"
                     className="rounded-xl bg-[#1f4fd7] px-4 py-2.5 font-semibold text-[#ffffff] disabled:opacity-70"
-                    disabled={submitting}
+                    disabled={createSubmitting}
                   >
-                    {submitting
-                      ? mode === "edit"
-                        ? "Updating..."
-                        : "Submitting..."
-                      : mode === "edit"
-                        ? "Update report"
-                        : "Submit report"}
+                    {createSubmitting ? "Submitting..." : "Submit report"}
                   </button>
                 </form>
               </section>
@@ -362,6 +372,21 @@ export function OpenStreetMapPanel() {
             document.body,
           )
         : null}
+
+      <ReportEditModal
+        isOpen={Boolean(editingReport)}
+        busy={editSubmitting}
+        error={editError}
+        report={editingReport}
+        onClose={() => {
+          if (!editSubmitting) {
+            setEditingReport(null);
+            setEditError(null);
+          }
+        }}
+        onSubmit={onEditSubmit}
+        onDelete={onEditDelete}
+      />
     </section>
   );
 }

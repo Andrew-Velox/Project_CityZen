@@ -4,6 +4,7 @@ import type {
   ReportComment,
   ReportCommentCreateRequest,
   ReportCreateRequest,
+  ReportUpdateRequest,
 } from "@/lib/api/types";
 
 export function createReport(payload: ReportCreateRequest, token: string) {
@@ -33,9 +34,15 @@ export function getReports() {
   });
 }
 
+export function getReportsByUser(userId: number) {
+  return apiRequest<Report[]>(`/report/reports/user/${userId}/`, {
+    method: "GET",
+  });
+}
+
 export function updateReport(
   reportId: number,
-  payload: Partial<ReportCreateRequest>,
+  payload: ReportUpdateRequest,
   token: string,
 ) {
   const formData = new FormData();
@@ -46,6 +53,9 @@ export function updateReport(
   if (payload.area !== undefined) formData.append("area", payload.area);
   if (payload.location !== undefined) formData.append("location", payload.location);
   if (payload.file) formData.append("file", payload.file);
+  if (payload.image_slots !== undefined) {
+    formData.append("image_slots", JSON.stringify(payload.image_slots));
+  }
   if (payload.files?.length) {
     payload.files.slice(0, 3).forEach((image) => formData.append("upload_images", image));
   }
@@ -53,6 +63,13 @@ export function updateReport(
   return apiRequest<Report>(`/report/reports/${reportId}/`, {
     method: "PATCH",
     body: formData,
+    token,
+  });
+}
+
+export function deleteReport(reportId: number, token: string) {
+  return apiRequest<null>(`/report/reports/${reportId}/`, {
+    method: "DELETE",
     token,
   });
 }
