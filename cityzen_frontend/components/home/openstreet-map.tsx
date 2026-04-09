@@ -418,20 +418,46 @@ export function OpenStreetMapPanel() {
                       required
                     />
 
+                    {/* 📸 UPDATED: Image Dropzone with Live Previews */}
                     <div className="mt-2 grid grid-cols-3 gap-3">
-                      {[0, 1, 2].map((idx) => (
-                        <div key={idx} className="relative">
-                          <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-4 transition hover:border-cyan-400 hover:bg-cyan-50">
-                            <span className="text-xs font-medium text-slate-500">ছবি {idx + 1}</span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => setFileAt(idx, e.target.files?.[0] || null)}
-                            />
-                          </label>
-                        </div>
-                      ))}
+                      {[0, 1, 2].map((idx) => {
+                        // Generate a temporary URL to preview the selected file
+                        const file = form.files[idx];
+                        const previewUrl = file ? URL.createObjectURL(file) : null;
+
+                        return (
+                          <div key={idx} className="relative group aspect-square">
+                            <label className="flex h-full w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition-colors hover:border-blue-400 hover:bg-blue-50">
+                              {previewUrl ? (
+                                <>
+                                  {/* Show the image preview */}
+                                  <img src={previewUrl} alt={`Preview ${idx + 1}`} className="h-full w-full object-cover" />
+                                  {/* Hover overlay to change image */}
+                                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:opacity-100">
+                                    <span className="rounded-lg bg-white/90 px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm">
+                                      Change
+                                    </span>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="mb-1 h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                  </svg>
+                                  <span className="text-[10px] font-semibold text-slate-500">Image {idx + 1}</span>
+                                </>
+                              )}
+                              
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => setFileAt(idx, e.target.files?.[0] || null)}
+                              />
+                            </label>
+                          </div>
+                        );
+                      })}
                     </div>
 
                     <button

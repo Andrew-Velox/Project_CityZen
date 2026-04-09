@@ -20,6 +20,7 @@ urlpatterns = [
 
     path('user/',include('rag_user.urls')),
     path('report/',include('report_cz.urls')),
+    path('faq/',include('faq_cz.urls')),
 
 ] 
 

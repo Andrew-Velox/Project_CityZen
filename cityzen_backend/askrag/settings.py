@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     'rag_user',
     'report_cz',
+    'faq_cz',
 
 ]
 

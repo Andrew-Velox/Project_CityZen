@@ -14,7 +14,6 @@ function formatDate(dateString: string) {
   const parsed = new Date(dateString);
   if (Number.isNaN(parsed.getTime())) return dateString;
   
-  // Cleaner, more modern date formatting (e.g., "Apr 9, 2:30 PM")
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
@@ -74,7 +73,6 @@ export default function ReportListPanel({ reports, loading, error, onReportClick
       {/* Content Area */}
       <div className="relative flex-1">
         {loading ? (
-          /* Premium Skeleton Loader */
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -90,14 +88,12 @@ export default function ReportListPanel({ reports, loading, error, onReportClick
             ))}
           </div>
         ) : error ? (
-          /* Error State */
           <div className="flex flex-col items-center justify-center rounded-2xl border border-red-100 bg-red-50 py-10 text-center">
             <span className="mb-2 text-2xl">⚠️</span>
-            <h4 className="text-sm font-semibold text-red-800">ফিড লোড করা যায়নি</h4>
+            <h4 className="text-sm font-semibold text-red-800">ফিড লোড করা যায়নি</h4>
             <p className="mt-1 text-xs text-red-600">{error}</p>
           </div>
         ) : sortedReports.length === 0 ? (
-          /* Empty State */
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-12 text-center shadow-sm">
             <svg className="mb-3 h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -106,54 +102,68 @@ export default function ReportListPanel({ reports, loading, error, onReportClick
             <p className="mt-1 text-xs text-slate-500">এই এলাকার কার্যক্রম এখানে দেখা যাবে।</p>
           </div>
         ) : (
-          /* Scrollable List */
           <div className="max-h-[420px] space-y-4 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5">
-            {sortedReports.map((report) => (
-              <button
-                key={report.id}
-                type="button"
-                onClick={() => onReportClick?.(report)}
-                className="group relative flex w-full flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
-              >
-                {/* Card Header */}
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h4 className="text-base font-bold leading-tight text-slate-900 group-hover:text-blue-600 transition-colors">
-                      {report.title}
-                    </h4>
-                    <p className="mt-1.5 text-xs font-medium text-slate-500">
-                      {report.author} • {formatDate(report.created_at)}
-                    </p>
-                  </div>
-                  <span
-                    className={`shrink-0 inline-flex items-center rounded-md px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide ring-1 ring-inset ${categoryClass(report.category)}`}
-                  >
-                    {report.category}
-                  </span>
-                </div>
+            {sortedReports.map((report) => {
+              // Check how many images this report has
+              const imageCount = report.image_items?.length || (report.images?.length ? report.images.length : (report.file ? 1 : 0));
 
-                {/* Card Body */}
-                <p className="line-clamp-2 text-sm leading-relaxed text-slate-600">
-                  {report.description}
-                </p>
+              return (
+                <button
+                  key={report.id}
+                  type="button"
+                  onClick={() => onReportClick?.(report)}
+                  className="group relative flex w-full flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+                >
+                  {/* Card Header */}
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h4 className="text-base font-bold leading-tight text-slate-900 transition-colors group-hover:text-blue-600">
+                        {report.title}
+                      </h4>
+                      <p className="mt-1.5 text-xs font-medium text-slate-500">
+                        {report.author} • {formatDate(report.created_at)}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 inline-flex items-center rounded-md px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide ring-1 ring-inset ${categoryClass(report.category)}`}
+                    >
+                      {report.category}
+                    </span>
+                  </div>
 
-                {/* Card Footer (Metadata) */}
-                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-slate-50 pt-3 text-xs font-medium text-slate-500">
-                  <div className="flex items-center gap-1.5">
-                    <svg className="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span className="truncate max-w-[120px]">{report.area}</span>
+                  {/* Card Body */}
+                  <p className="line-clamp-2 text-sm leading-relaxed text-slate-600">
+                    {report.description}
+                  </p>
+
+                  {/* Card Footer (Metadata) */}
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-slate-50 pt-3 text-xs font-medium text-slate-500">
+                    <div className="flex items-center gap-1.5">
+                      <svg className="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span className="max-w-[120px] truncate">{report.area}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1.5">
+                      <span className={`h-1.5 w-1.5 rounded-full shadow-sm ${getStatusColor(report.status)}`}></span>
+                      <span className="capitalize">{report.status.replace("_", " ")}</span>
+                    </div>
+
+                    {/* NEW: Attachment Indicator */}
+                    {imageCount > 0 && (
+                      <div className="flex items-center gap-1 text-slate-400">
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>{imageCount}</span>
+                      </div>
+                    )}
                   </div>
-                  
-                  <div className="flex items-center gap-1.5">
-                    <span className={`h-1.5 w-1.5 rounded-full shadow-sm ${getStatusColor(report.status)}`}></span>
-                    <span className="capitalize">{report.status.replace("_", " ")}</span>
-                  </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

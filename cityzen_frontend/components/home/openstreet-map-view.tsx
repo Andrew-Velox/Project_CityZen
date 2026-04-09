@@ -23,20 +23,11 @@ function createCategoryIcon(category: Report["category"]) {
 
   return L.divIcon({
     html: `
-      <div style="position:relative;width:44px;height:52px;display:flex;align-items:flex-start;justify-content:center;">
-        <span style="position:absolute;left:50%;top:4px;transform:translateX(-50%);width:34px;height:34px;border-radius:999px;background:${meta.hex};opacity:.25;filter:blur(6px);"></span>
-        <div style="
-          width:34px;
-          height:34px;
-          border-radius:50% 50% 50% 0;
-          transform:rotate(-45deg);
-          background:${meta.hex};
-          border:2px solid #ffffff;
-          box-shadow:0 8px 14px #02061755;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-        ">
+      <div class="cityzen-report-marker" style="--marker-color:${meta.hex};">
+        <span class="cityzen-report-marker__pulse"></span>
+        <span class="cityzen-report-marker__pulse cityzen-report-marker__pulse--delay"></span>
+        <span class="cityzen-report-marker__glow"></span>
+        <div class="cityzen-report-marker__pin">
           <span style="
             transform:rotate(45deg);
             color:#ffffff;
@@ -49,10 +40,10 @@ function createCategoryIcon(category: Report["category"]) {
         </div>
       </div>
     `,
-    className: "bg-transparent border-none",
-    iconSize: [44, 52],
-    iconAnchor: [22, 50],
-    popupAnchor: [0, -44],
+    className: "cityzen-report-marker-icon bg-transparent border-none",
+    iconSize: [56, 68],
+    iconAnchor: [28, 62],
+    popupAnchor: [0, -54],
   });
 }
 
@@ -208,7 +199,7 @@ export default function OpenStreetMapView({ reports, onLocationPick, onEditRepor
       >
         <MapContainer
           center={dhakaPosition}
-          zoom={12}
+          zoom={7.3}
           zoomControl={false}
           scrollWheelZoom
           className="cityzen-map h-full w-full outline-none"
@@ -337,6 +328,71 @@ export default function OpenStreetMapView({ reports, onLocationPick, onEditRepor
 
       {/* Global override for Leaflet's default popup background/padding to make the custom styling seamless */}
       <style dangerouslySetInnerHTML={{__html: `
+        .cityzen-report-marker {
+          position: relative;
+          width: 56px;
+          height: 68px;
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          pointer-events: none;
+          filter: drop-shadow(0 8px 16px #0f172a55);
+        }
+        .cityzen-report-marker__pulse {
+          position: absolute;
+          left: 50%;
+          top: 10px;
+          width: 34px;
+          height: 34px;
+          border-radius: 999px;
+          border: 2px solid var(--marker-color);
+          transform: translateX(-50%);
+          opacity: 0.75;
+          animation: cityzen-marker-radiate 1.8s ease-out infinite;
+        }
+        .cityzen-report-marker__pulse--delay {
+          animation-delay: .9s;
+        }
+        .cityzen-report-marker__glow {
+          position: absolute;
+          left: 50%;
+          top: 6px;
+          width: 38px;
+          height: 38px;
+          border-radius: 999px;
+          transform: translateX(-50%);
+          background: radial-gradient(circle, color-mix(in srgb, var(--marker-color) 48%, white 52%) 0%, transparent 72%);
+          opacity: .5;
+          filter: blur(4px);
+        }
+        .cityzen-report-marker__pin {
+          width: 36px;
+          height: 36px;
+          border-radius: 50% 50% 50% 0;
+          transform: rotate(-45deg);
+          background: var(--marker-color);
+          border: 2px solid #ffffff;
+          box-shadow: 0 10px 16px #02061766;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          z-index: 2;
+        }
+        @keyframes cityzen-marker-radiate {
+          0% {
+            transform: translateX(-50%) scale(.72);
+            opacity: .72;
+          }
+          65% {
+            transform: translateX(-50%) scale(1.8);
+            opacity: .16;
+          }
+          100% {
+            transform: translateX(-50%) scale(2.1);
+            opacity: 0;
+          }
+        }
         .leaflet-popup-content-wrapper {
           background: transparent !important;
           box-shadow: none !important;

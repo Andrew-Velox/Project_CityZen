@@ -124,3 +124,14 @@ export type ReportCommentCreateRequest = {
   content: string;
   parent?: number | null;
 };
+
+export type FaqItem = {
+  id: number;
+  question: string;
+  answer: string;
+  category: "general" | "account" | "reporting" | "community" | "technical";
+  order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
