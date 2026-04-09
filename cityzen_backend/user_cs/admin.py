@@ -5,13 +5,15 @@ from django.contrib.auth.admin import UserAdmin
 
 class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
-        ('Profile Information', {'fields': ('image','gender','birth_date','is_verified')}),
+        ('Custom Fields', {'fields': ('image', 'gender', 'birth_date', 'is_verified')}),
     )
-    
+
     add_fieldsets = UserAdmin.add_fieldsets + (
-        ('Profile Information', {'fields': ('image','gender','birth_date','is_verified')}),
+        ('Custom Fields', {'fields': ('email', 'first_name', 'last_name', 'image', 'gender', 'birth_date', 'is_verified')}),
     )
 
-
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active', 'is_verified')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
+    ordering = ('username',)
 
 admin.site.register(CustomUser, CustomUserAdmin)
