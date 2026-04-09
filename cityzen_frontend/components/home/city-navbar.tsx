@@ -167,9 +167,9 @@ export function CityNavbar() {
         {/* Right Section: Auth & Mobile Toggle */}
         <div className="flex items-center justify-end gap-2 sm:gap-3">
           {isLoading ? (
-            <div className="hidden sm:block h-10 w-24 animate-pulse rounded-xl bg-[#e2e8f0]" />
+            <div className="hidden md:block h-10 w-24 animate-pulse rounded-xl bg-[#e2e8f0]" />
           ) : !isLoggedIn ? (
-            <div className="hidden sm:flex flex-wrap gap-2">
+            <div className="hidden md:flex flex-wrap gap-2">
               <Link
                 href="/login"
                 className="rounded-xl px-3 py-2 font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:bg-[#edf2fb] hover:text-[#233e7f]"
@@ -291,7 +291,7 @@ export function CityNavbar() {
 
               {/* Show auth links in mobile menu if not logged in */}
               {!isLoading && !isLoggedIn && (
-                <div className="mt-2 flex flex-col gap-2 border-t border-[#d3dbe8] pt-3 sm:hidden">
+                <div className="mt-2 flex flex-col gap-2 border-t border-[#d3dbe8] pt-3">
                   <Link
                     href="/login"
                     className="rounded-xl px-4 py-3 text-center text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb]"
