@@ -15,11 +15,13 @@ type NavbarUser = {
 
 export function CityNavbar() {
   const router = useRouter();
+  const navRef = useRef<HTMLElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<NavbarUser | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -101,11 +103,16 @@ export function CityNavbar() {
     };
   }, []);
 
+  // Close menus when clicking outside
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
-      if (!dropdownRef.current) return;
-      if (!dropdownRef.current.contains(event.target as Node)) {
+      // Close profile dropdown
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
+      }
+      // Close mobile menu
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setIsMobileMenuOpen(false);
       }
     }
 
@@ -115,27 +122,33 @@ export function CityNavbar() {
     };
   }, []);
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [router]);
+
   function handleLogout() {
     clearTokens();
     setIsLoggedIn(false);
     setUser(null);
     setIsDropdownOpen(false);
+    setIsMobileMenuOpen(false);
     router.push("/login");
   }
 
   return (
-    <header className="sticky top-0 z-[2200] mx-auto w-full shrink-0 bg-transparent transition-all">
+    <header className="sticky top-0 z-[2200] mx-auto w-full shrink-0 bg-transparent transition-all" ref={navRef}>
       <nav
         className="relative z-[2201] mx-4 mt-4 flex items-center justify-between gap-3 rounded-3xl border border-[#c5d7ea99] bg-[#e9f5ff3b] px-4 py-3 shadow-[0_10px_26px_#1528481a] backdrop-blur-[14px]"
         aria-label="Main navigation"
       >
         {/* Logo */}
-        <Link href="/" className="inline-flex min-w-[120px] items-center gap-2 font-extrabold tracking-[0.01em] text-[#0f172a]">
+        <Link href="/" className="inline-flex items-center gap-2 font-extrabold tracking-[0.01em] text-[#0f172a]">
           <span className="h-[10px] w-[10px] rounded-full bg-gradient-to-br from-[#1f4fd7] to-[#2f5c7c]" />
           CityZen
         </Link>
 
-        {/* Middle Links */}
+        {/* Desktop Middle Links */}
         <div className="hidden md:flex items-center gap-6">
           <Link href="/" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
             হোম
@@ -151,12 +164,12 @@ export function CityNavbar() {
           </Link>
         </div>
 
-        {/* Auth Section */}
-        <div className="flex min-w-[120px] justify-end">
+        {/* Right Section: Auth & Mobile Toggle */}
+        <div className="flex items-center justify-end gap-2 sm:gap-3">
           {isLoading ? (
-            <div className="h-10 w-24 animate-pulse rounded-xl bg-[#e2e8f0]" />
+            <div className="hidden sm:block h-10 w-24 animate-pulse rounded-xl bg-[#e2e8f0]" />
           ) : !isLoggedIn ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="hidden sm:flex flex-wrap gap-2">
               <Link
                 href="/login"
                 className="rounded-xl px-3 py-2 font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:bg-[#edf2fb] hover:text-[#233e7f]"
@@ -196,9 +209,10 @@ export function CityNavbar() {
                     {(user?.firstName || "U").charAt(0).toUpperCase()}
                   </span>
                 )}
-                <span className={`text-[0.9rem] leading-none text-[#2b3f66] transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}>▾</span>
+                <span className={`hidden sm:block text-[0.9rem] leading-none text-[#2b3f66] transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}>▾</span>
               </button>
 
+              {/* Profile Dropdown */}
               {isDropdownOpen ? (
                 <div
                   className="absolute right-0 top-[calc(100%+0.6rem)] z-[3000] min-w-[196px] overflow-hidden rounded-2xl border border-[#d3dbe8] bg-gradient-to-b from-[#ffffff] to-[#f6f8fc] shadow-[0_20px_40px_#0f214428] animate-in fade-in slide-in-from-top-2"
@@ -224,7 +238,79 @@ export function CityNavbar() {
               ) : null}
             </div>
           )}
+
+          {/* Hamburger Icon (Mobile Only) */}
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-xl p-2 text-[#334155] transition hover:bg-[#edf2fb] md:hidden"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle mobile menu"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {isMobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {isMobileMenuOpen ? (
+          <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-[3000] overflow-hidden rounded-3xl border border-[#c5d7ea99] bg-[#ffffffef] p-3 shadow-[0_20px_40px_#15284826] backdrop-blur-[14px] md:hidden animate-in fade-in slide-in-from-top-4">
+            <div className="flex flex-col gap-1">
+              <Link
+                href="/"
+                className="rounded-xl px-4 py-3 text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb] hover:text-[#1f4fd7]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                হোম
+              </Link>
+              <Link
+                href="/community"
+                className="rounded-xl px-4 py-3 text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb] hover:text-[#1f4fd7]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                কমিউনিটি
+              </Link>
+              <Link
+                href="/about"
+                className="rounded-xl px-4 py-3 text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb] hover:text-[#1f4fd7]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                পরিচিতি
+              </Link>
+              <Link
+                href="/faq"
+                className="rounded-xl px-4 py-3 text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb] hover:text-[#1f4fd7]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                জিজ্ঞাসা
+              </Link>
+
+              {/* Show auth links in mobile menu if not logged in */}
+              {!isLoading && !isLoggedIn && (
+                <div className="mt-2 flex flex-col gap-2 border-t border-[#d3dbe8] pt-3 sm:hidden">
+                  <Link
+                    href="/login"
+                    className="rounded-xl px-4 py-3 text-center text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb]"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    লগইন
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="rounded-xl bg-gradient-to-br from-[#1f4fd7] to-[#173ea8] px-4 py-3 text-center text-[0.95rem] font-semibold text-[#ffffff] shadow-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    সাইন আপ
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
       </nav>
     </header>
   );
