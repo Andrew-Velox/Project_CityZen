@@ -124,7 +124,7 @@ export function CityNavbar() {
   }
 
   return (
-    <header className="sticky top-0 z-[2200] mx-auto w-full shrink-0 ">
+    <header className="sticky top-0 z-[2200] mx-auto w-full shrink-0 bg-transparent transition-all">
       <nav
         className="relative z-[2201] mx-4 mt-4 flex items-center justify-between gap-3 rounded-3xl border border-[#c5d7ea99] bg-[#e9f5ff3b] px-4 py-3 shadow-[0_10px_26px_#1528481a] backdrop-blur-[14px]"
         aria-label="Main navigation"
@@ -138,16 +138,16 @@ export function CityNavbar() {
         {/* Middle Links */}
         <div className="hidden md:flex items-center gap-6">
           <Link href="/" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
-            Home
+            হোম
           </Link>
           <Link href="/community" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
-            Community
+            কমিউনিটি
           </Link>
           <Link href="/about" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
-            About
+            পরিচিতি
           </Link>
           <Link href="/faq" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
-            FAQ
+            জিজ্ঞাসা
           </Link>
         </div>
 
@@ -161,19 +161,19 @@ export function CityNavbar() {
                 href="/login"
                 className="rounded-xl px-3 py-2 font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:bg-[#edf2fb] hover:text-[#233e7f]"
               >
-                Login
+                লগইন
               </Link>
               <Link
                 href="/signup"
                 className="rounded-xl bg-gradient-to-br from-[#1f4fd7] to-[#173ea8] px-3 py-2 font-semibold text-[#ffffff] transition hover:-translate-y-[1px] hover:shadow-[0_10px_20px_#12295a36]"
               >
-                Sign up
+                সাইন আপ
               </Link>
             </div>
           ) : (
             <div className="relative z-[2202] flex items-center justify-end gap-3" ref={dropdownRef}>
               <p className="hidden text-[0.94rem] font-semibold text-[#243147] sm:block">
-                Welcome, {user?.firstName || "User"}
+                স্বাগতম, {user?.firstName || "ব্যবহারকারী"}
               </p>
 
               <button
@@ -210,7 +210,7 @@ export function CityNavbar() {
                     className="block w-full px-4 py-3 text-left font-semibold text-[#1f2937] transition hover:bg-[#edf2fb] hover:text-[#1f3f85]"
                     onClick={() => setIsDropdownOpen(false)}
                   >
-                    Profile
+                    প্রোফাইল
                   </Link>
                   <button
                     type="button"
@@ -218,7 +218,7 @@ export function CityNavbar() {
                     className="block w-full px-4 py-3 text-left font-semibold text-[#ef4444] transition hover:bg-[#fef2f2] hover:text-[#b91c1c]"
                     onClick={handleLogout}
                   >
-                    Logout
+                    লগআউট
                   </button>
                 </div>
               ) : null}

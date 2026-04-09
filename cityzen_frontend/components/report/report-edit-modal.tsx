@@ -133,8 +133,8 @@ export default function ReportEditModal({
         {/* Sticky Header */}
         <header className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-slate-50/50 px-6 py-4 sm:px-8">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Edit Report</h2>
-            <p className="text-xs font-medium text-slate-500">Update details or manage attached media.</p>
+            <h2 className="text-lg font-bold text-slate-900">রিপোর্ট সম্পাদনা</h2>
+            <p className="text-xs font-medium text-slate-500">তথ্য আপডেট করুন বা সংযুক্ত মিডিয়া পরিচালনা করুন।</p>
           </div>
           <button
             type="button"
@@ -174,7 +174,7 @@ export default function ReportEditModal({
           }}>
             
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">Report Title</label>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">রিপোর্ট শিরোনাম</label>
               <input 
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" 
                 value={title} 
@@ -184,7 +184,7 @@ export default function ReportEditModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">Description</label>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">বিবরণ</label>
               <textarea 
                 className="min-h-[100px] w-full resize-none rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" 
                 value={description} 
@@ -195,21 +195,21 @@ export default function ReportEditModal({
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700">Category</label>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">ক্যাটাগরি</label>
                 <select
                   className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
                   value={category}
                   onChange={(e) => setCategory(e.target.value as any)}
                 >
-                  <option value="danger">Danger</option>
-                  <option value="help">Needs Help</option>
-                  <option value="warning">Warning</option>
-                  <option value="healthy">All Clear</option>
+                  <option value="danger">বিপদ</option>
+                  <option value="help">সহায়তা প্রয়োজন</option>
+                  <option value="warning">সতর্কতা</option>
+                  <option value="healthy">নিরাপদ</option>
                 </select>
               </div>
               
               <div>
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700">Area</label>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">এলাকা</label>
                 <input 
                   className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" 
                   value={area} 
@@ -220,7 +220,7 @@ export default function ReportEditModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">Location Coordinates</label>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">লোকেশন কোঅর্ডিনেট</label>
               <input 
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-500 outline-none" 
                 value={location} 
@@ -234,8 +234,8 @@ export default function ReportEditModal({
             <div className="pt-2">
               <div className="mb-3 flex items-end justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-700">Attached Media</h3>
-                  <p className="text-xs text-slate-500">Upload up to 3 images for this report.</p>
+                  <h3 className="text-sm font-semibold text-slate-700">সংযুক্ত মিডিয়া</h3>
+                  <p className="text-xs text-slate-500">এই রিপোর্টে সর্বোচ্চ ৩টি ছবি আপলোড করুন।</p>
                 </div>
                 <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
                   {imageSlots.length} / 3
@@ -261,14 +261,14 @@ export default function ReportEditModal({
                       ) : (
                         <div className="flex h-full flex-col items-center justify-center p-4 text-center">
                           <span className="text-2xl">⚠️</span>
-                          <p className="mt-1 text-[10px] font-medium text-slate-500">Image missing</p>
+                          <p className="mt-1 text-[10px] font-medium text-slate-500">ছবি পাওয়া যায়নি</p>
                         </div>
                       )}
 
                       {/* Hover Overlay Controls */}
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/40 opacity-0 backdrop-blur-[2px] transition-opacity duration-200 group-hover:opacity-100">
                         <label className="flex w-24 cursor-pointer items-center justify-center rounded-lg bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-white hover:scale-105 active:scale-95">
-                          Replace
+                          বদলান
                           <input
                             type="file"
                             accept="image/*"
@@ -286,14 +286,14 @@ export default function ReportEditModal({
                           onClick={() => removeImageAt(index)}
                           disabled={busy}
                         >
-                          Remove
+                          সরান
                         </button>
                       </div>
                       
                       {/* Badge indicator for new vs existing */}
                       {slot.kind === "new" && (
                         <span className="absolute left-2 top-2 rounded-md bg-blue-500 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white shadow-sm">
-                          New
+                          নতুন
                         </span>
                       )}
                     </div>
@@ -306,7 +306,7 @@ export default function ReportEditModal({
                     <svg className="mb-2 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    <span className="text-xs font-semibold">Add Image</span>
+                    <span className="text-xs font-semibold">ছবি যোগ করুন</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -334,7 +334,7 @@ export default function ReportEditModal({
                 onClick={onDelete} 
                 disabled={busy}
               >
-                Delete Report
+                রিপোর্ট মুছুন
               </button>
             )}
           </div>
@@ -345,7 +345,7 @@ export default function ReportEditModal({
               onClick={onClose} 
               disabled={busy}
             >
-              Cancel
+              বাতিল
             </button>
             <button 
               type="submit" 
@@ -353,7 +353,7 @@ export default function ReportEditModal({
               className="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-70" 
               disabled={busy}
             >
-              {busy ? "Saving..." : "Save Changes"}
+              {busy ? "সংরক্ষণ হচ্ছে..." : "পরিবর্তন সংরক্ষণ করুন"}
             </button>
           </div>
         </footer>

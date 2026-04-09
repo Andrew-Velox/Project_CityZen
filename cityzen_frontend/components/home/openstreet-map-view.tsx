@@ -13,41 +13,46 @@ const dhakaPosition: [number, number] = [23.8103, 90.4125];
 
 function createCategoryIcon(category: Report["category"]) {
   const categoryMeta = {
-    danger: { bg: "#b42318", emoji: "!" },
-    help: { bg: "#1d4ed8", emoji: "?" },
-    warning: { bg: "#b54708", emoji: "!" },
-    healthy: { bg: "#027a48", emoji: "OK" },
+    danger: { hex: "#ef4444", symbol: "!" },
+    help: { hex: "#3b82f6", symbol: "?" },
+    warning: { hex: "#f59e0b", symbol: "!" },
+    healthy: { hex: "#10b981", symbol: "OK" },
   } as const;
 
   const meta = categoryMeta[category] || categoryMeta.warning;
 
   return L.divIcon({
     html: `
-      <div style="
-        background:${meta.bg};
-        width:34px;
-        height:34px;
-        border-radius:50% 50% 50% 0;
-        transform:rotate(-45deg);
-        border:2px solid #fff;
-        box-shadow:0 4px 10px #00000047;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-      ">
-        <span style="
-          transform:rotate(45deg);
-          color:#fff;
-          font-size:11px;
-          font-weight:700;
-          line-height:1;
-        ">${meta.emoji}</span>
+      <div style="position:relative;width:44px;height:52px;display:flex;align-items:flex-start;justify-content:center;">
+        <span style="position:absolute;left:50%;top:4px;transform:translateX(-50%);width:34px;height:34px;border-radius:999px;background:${meta.hex};opacity:.25;filter:blur(6px);"></span>
+        <div style="
+          width:34px;
+          height:34px;
+          border-radius:50% 50% 50% 0;
+          transform:rotate(-45deg);
+          background:${meta.hex};
+          border:2px solid #ffffff;
+          box-shadow:0 8px 14px #02061755;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+        ">
+          <span style="
+            transform:rotate(45deg);
+            color:#ffffff;
+            font-size:${meta.symbol === "OK" ? "10px" : "13px"};
+            font-weight:800;
+            line-height:1;
+            font-family:Inter,system-ui,-apple-system,sans-serif;
+            letter-spacing:${meta.symbol === "OK" ? "0.02em" : "0"};
+          ">${meta.symbol}</span>
+        </div>
       </div>
     `,
-    className: "",
-    iconSize: [34, 34],
-    iconAnchor: [17, 34],
-    popupAnchor: [0, -32],
+    className: "bg-transparent border-none",
+    iconSize: [44, 52],
+    iconAnchor: [22, 50],
+    popupAnchor: [0, -44],
   });
 }
 
@@ -57,28 +62,35 @@ type OpenStreetMapViewProps = {
   onEditReport?: (report: Report) => void;
 };
 
-function MapClickPicker({ onPick }: { onPick?: (lat: number, lng: number) => void }) {
+function MapClickPicker({
+  onPick,
+  onMapClick,
+}: {
+  onPick?: (lat: number, lng: number) => void;
+  onMapClick?: (lat: number, lng: number) => void;
+}) {
   useMapEvents({
     click(event) {
+      onMapClick?.(event.latlng.lat, event.latlng.lng);
       if (!onPick) return;
       onPick(event.latlng.lat, event.latlng.lng);
     },
   });
-
   return null;
 }
 
 function PopupCloseButton() {
   const map = useMap();
-
   return (
     <button
       type="button"
       onClick={() => map.closePopup()}
       aria-label="Close popup"
-      className="absolute right-0 top-0 inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#c9d5e9] bg-[#f4f7fd] text-[1rem] font-bold leading-none text-[#405a83] transition hover:bg-[#e9f0fb] hover:text-[#203b67]"
+      className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700"
     >
-      ×
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+      </svg>
     </button>
   );
 }
@@ -91,6 +103,7 @@ function parseLocation(location: string): [number, number] | null {
 }
 
 export default function OpenStreetMapView({ reports, onLocationPick, onEditReport }: OpenStreetMapViewProps) {
+  const [selectedPosition, setSelectedPosition] = useState<[number, number]>(dhakaPosition);
   const [detailsReport, setDetailsReport] = useState<Report | null>(null);
   const [comments, setComments] = useState<ReportComment[]>([]);
   const [commentInput, setCommentInput] = useState("");
@@ -99,12 +112,9 @@ export default function OpenStreetMapView({ reports, onLocationPick, onEditRepor
   const [commentError, setCommentError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Ensure marker icons work in Next.js build output.
     try {
       delete (L.Icon.Default.prototype as L.Icon.Default & { _getIconUrl?: unknown })._getIconUrl;
-    } catch {
-      // Ignore browser-specific prototype delete restrictions.
-    }
+    } catch {}
 
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -147,7 +157,7 @@ export default function OpenStreetMapView({ reports, onLocationPick, onEditRepor
       const data = await getReportComments(report.id);
       setComments(data);
     } catch {
-      setCommentError("Could not load comments for this report.");
+      setCommentError("এই রিপোর্টের মন্তব্য লোড করা যায়নি।");
     } finally {
       setCommentsLoading(false);
     }
@@ -168,7 +178,7 @@ export default function OpenStreetMapView({ reports, onLocationPick, onEditRepor
 
     const token = getAccessToken();
     if (!token) {
-      setCommentError("Please log in to add a comment.");
+      setCommentError("মন্তব্য করতে আগে লগইন করুন।");
       return;
     }
 
@@ -180,7 +190,7 @@ export default function OpenStreetMapView({ reports, onLocationPick, onEditRepor
       setComments((prev) => [...prev, created]);
       setCommentInput("");
     } catch (err) {
-      setCommentError(err instanceof Error ? err.message : "Failed to post comment.");
+      setCommentError(err instanceof Error ? err.message : "মন্তব্য পোস্ট করা যায়নি।");
     } finally {
       setCommentSubmitting(false);
     }
@@ -192,7 +202,7 @@ export default function OpenStreetMapView({ reports, onLocationPick, onEditRepor
   return (
     <>
       <div
-        className="mt-3 h-full min-h-0 overflow-hidden rounded-2xl border border-[#d1dbea] shadow-[inset_0_1px_0_#ffffff]"
+        className="relative z-0 h-full w-full min-h-0 overflow-hidden rounded-none bg-transparent"
         role="region"
         aria-label="Map viewport"
       >
@@ -201,20 +211,28 @@ export default function OpenStreetMapView({ reports, onLocationPick, onEditRepor
           zoom={12}
           zoomControl={false}
           scrollWheelZoom
-          className="h-full w-full min-h-0"
-          style={{ height: "100%", width: "100%" }}
+          className="cityzen-map h-full w-full outline-none"
+          style={{ height: "100%", width: "100%", backgroundColor: "#f8fafc" }}
         >
-          <MapClickPicker onPick={onLocationPick} />
-          <ZoomControl position="bottomleft" />
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          <MapClickPicker
+            onPick={onLocationPick}
+            onMapClick={(lat, lng) => setSelectedPosition([lat, lng])}
           />
-          <Marker position={dhakaPosition}>
-            <Popup closeButton={false}>
-              <div className="relative pr-8 text-[0.88rem] text-[#334155]">
+          <ZoomControl position="bottomleft" />
+          
+          <TileLayer
+            attribution='&copy; Google'
+            url="https://{s}.google.com/vt/lyrs=m&hl=bn&x={x}&y={y}&z={z}"
+            subdomains={["mt0", "mt1", "mt2", "mt3"]}
+          />
+
+          <Marker position={selectedPosition}>
+            <Popup closeButton={false} className="custom-leaflet-popup">
+              <div className="relative overflow-hidden rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-900/5">
                 <PopupCloseButton />
-                CityZen default location: Dhaka
+                <p className="pr-6 text-sm font-medium text-slate-700">
+                  নির্বাচিত স্থান: {selectedPosition[0].toFixed(5)}, {selectedPosition[1].toFixed(5)}
+                </p>
               </div>
             </Popup>
           </Marker>
@@ -228,63 +246,70 @@ export default function OpenStreetMapView({ reports, onLocationPick, onEditRepor
 
             return (
               <Marker key={report.id} position={position} icon={createCategoryIcon(report.category)}>
-                <Popup closeButton={false}>
-                  <div className="relative w-[min(72vw,260px)] min-w-[180px] pr-8">
+                {/* Note: Leaflet injects its own wrapper. 
+                  Using inline styles and tailwind on the inner div overpowers the default look nicely.
+                */}
+                <Popup closeButton={false} minWidth={280} maxWidth={320}>
+                  <div className="-m-3 relative overflow-hidden rounded-2xl bg-white p-5 shadow-xl ring-1 ring-slate-900/5">
                     <PopupCloseButton />
-                    <h4 className="mb-2 text-[1rem] font-bold text-[#0f172a]">{report.title}</h4>
-                    <p className="my-1 line-clamp-2 text-[0.86rem] text-[#334155]">{report.description}</p>
-                    {hasImage ? (
-                      <img
-                        src={imageUrls[0]}
-                        alt={`${report.title} preview`}
-                        className="my-2 h-24 w-full rounded-lg border border-[#d4deee] object-cover"
-                        loading="lazy"
-                      />
-                    ) : null}
-                    {imageUrls.length > 1 ? (
-                      <p className="text-[0.76rem] font-semibold text-[#64748b]">+{imageUrls.length - 1} more image(s)</p>
-                    ) : null}
-                    <p className="my-1 text-[0.86rem] text-[#334155]">
-                      <strong>Category:</strong>{" "}
-                      <span
-                        className={`inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-[0.76rem] font-bold capitalize ${
-                          report.category === "danger"
-                            ? "border-[#f4c8c1] bg-[#fff2ef] text-[#b9382c]"
-                            : report.category === "help"
-                              ? "border-[#bfd0ee] bg-[#edf2fb] text-[#1f4fd7]"
-                              : report.category === "warning"
-                                ? "border-[#efd6ad] bg-[#fff7ea] text-[#aa6a13]"
-                                : "border-[#b9e5d0] bg-[#edf9f3] text-[#167a52]"
-                        }`}
-                      >
-                        {report.category}
-                      </span>
-                    </p>
-                    <p className="my-1 text-[0.86rem] text-[#334155]">
-                      <strong>Area:</strong> {report.area}
-                    </p>
-                    <p className="my-1 text-[0.86rem] text-[#334155]">
-                      <strong>Status:</strong> {report.status}
-                    </p>
-                    <p className="my-1 text-[0.86rem] text-[#334155]">
-                      <strong>Owner:</strong> {report.author}
-                    </p>
-                    <button
-                      type="button"
-                      className="mt-2 rounded-lg border border-[#c7d3e6] bg-[#edf2fa] px-2.5 py-1.5 font-bold text-[#2b456f] transition hover:bg-[#e1e9f6]"
-                      onClick={() => openReportDetails(report)}
-                    >
-                      View full details
-                    </button>
-                    {onEditReport ? (
+                    
+                    <h4 className="mb-1.5 pr-6 text-lg font-bold leading-tight text-slate-900">{report.title}</h4>
+                    <p className="mb-3 line-clamp-2 text-sm text-slate-500">{report.description}</p>
+                    
+                    {hasImage && (
+                      <div className="relative mb-4 overflow-hidden rounded-xl bg-slate-100">
+                        <img
+                          src={imageUrls[0]}
+                          alt={`${report.title} preview`}
+                          className="h-32 w-full object-cover transition-transform duration-300 hover:scale-105"
+                          loading="lazy"
+                        />
+                        {imageUrls.length > 1 && (
+                          <div className="absolute bottom-2 right-2 rounded-md bg-black/60 px-2 py-1 text-xs font-semibold text-white backdrop-blur-md">
+                            +{imageUrls.length - 1} more
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="mb-4 grid grid-cols-2 gap-y-2 text-sm">
+                      <div className="text-slate-500">ক্যাটাগরি</div>
+                      <div>
+                        <span
+                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold capitalize ring-1 ring-inset ${
+                            report.category === "danger" ? "bg-red-50 text-red-700 ring-red-600/10"
+                            : report.category === "help" ? "bg-blue-50 text-blue-700 ring-blue-600/10"
+                            : report.category === "warning" ? "bg-amber-50 text-amber-700 ring-amber-600/10"
+                            : "bg-emerald-50 text-emerald-700 ring-emerald-600/10"
+                          }`}
+                        >
+                          {report.category}
+                        </span>
+                      </div>
+                      <div className="text-slate-500">এলাকা</div>
+                      <div className="font-medium text-slate-900 truncate">{report.area}</div>
+                      <div className="text-slate-500">স্ট্যাটাস</div>
+                      <div className="font-medium text-slate-900 capitalize">{report.status}</div>
+                    </div>
+
+                    <div className="flex gap-2">
                       <button
                         type="button"
-                        className="mt-2 ml-2 rounded-lg border border-[#c7d3e6] bg-[#edf2fa] px-2.5 py-1.5 font-bold text-[#2b456f] transition hover:bg-[#e1e9f6]"
-                        onClick={() => onEditReport(report)}
+                        className="flex-1 rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+                        onClick={() => openReportDetails(report)}
                       >
-                        Edit
+                        বিস্তারিত দেখুন
                       </button>
-                    ) : null}
+                      {onEditReport && (
+                        <button
+                          type="button"
+                          className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95"
+                          onClick={() => onEditReport(report)}
+                        >
+                          সম্পাদনা
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -309,6 +334,22 @@ export default function OpenStreetMapView({ reports, onLocationPick, onEditRepor
         onSubmitComment={submitComment}
         formatDate={formatDate}
       />
+
+      {/* Global override for Leaflet's default popup background/padding to make the custom styling seamless */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .leaflet-popup-content-wrapper {
+          background: transparent !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+        }
+        .leaflet-popup-tip-container {
+          display: none !important;
+        }
+        .leaflet-popup-content {
+          margin: 0 !important;
+          width: auto !important;
+        }
+      `}} />
     </>
   );
 }

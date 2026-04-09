@@ -8,12 +8,13 @@ import { createReport, deleteReport, getReports, updateReport } from "@/lib/api/
 import { getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token-store";
 import { ApiError, type Report } from "@/lib/api/types";
 import ReportEditModal, { type ReportEditSubmitPayload } from "@/components/report/report-edit-modal";
+import ReportListPanel from "@/components/report/report-list-panel";
 
 const OpenStreetMapView = dynamic(() => import("@/components/home/openstreet-map-view"), {
   ssr: false,
   loading: () => (
     <div className="grid h-full min-h-[400px] w-full place-items-center bg-slate-50 text-sm font-medium text-slate-500 animate-pulse">
-      Initializing map instance...
+      ম্যাপ লোড হচ্ছে...
     </div>
   ),
 });
@@ -61,7 +62,7 @@ export function OpenStreetMapPanel() {
       const data = await getReports();
       setReports(data);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to load reports for map.";
+      const message = err instanceof Error ? err.message : "ম্যাপের রিপোর্ট লোড করা যায়নি।";
       setError(message);
     } finally {
       setLoadingReports(false);
@@ -106,7 +107,7 @@ export function OpenStreetMapPanel() {
     const access = getAccessToken();
     const refresh = getRefreshToken();
 
-    if (!access) throw new Error("Please log in first to submit a report.");
+    if (!access) throw new Error("রিপোর্ট জমা দিতে আগে লগইন করুন।");
 
     try {
       return await fn(access);
@@ -174,7 +175,7 @@ export function OpenStreetMapPanel() {
       resetForm();
       await loadReports();
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : "Failed to submit report.");
+      setCreateError(err instanceof Error ? err.message : "রিপোর্ট জমা দেওয়া যায়নি।");
     } finally {
       setCreateSubmitting(false);
     }
@@ -204,7 +205,7 @@ export function OpenStreetMapPanel() {
       setEditingReport(null);
       await loadReports();
     } catch (err) {
-      setEditError(err instanceof Error ? err.message : "Failed to update report.");
+      setEditError(err instanceof Error ? err.message : "রিপোর্ট আপডেট করা যায়নি।");
     } finally {
       setEditSubmitting(false);
     }
@@ -220,7 +221,7 @@ export function OpenStreetMapPanel() {
       setEditingReport(null);
       await loadReports();
     } catch (err) {
-      setEditError(err instanceof Error ? err.message : "Failed to delete report.");
+      setEditError(err instanceof Error ? err.message : "রিপোর্ট মুছে ফেলা যায়নি।");
     } finally {
       setEditSubmitting(false);
     }
@@ -234,11 +235,11 @@ export function OpenStreetMapPanel() {
           <div>
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-              <p className="font-mono text-xs font-semibold uppercase tracking-wider text-slate-500">Live Radar</p>
+              <p className="font-mono text-xs font-semibold uppercase tracking-wider text-slate-500">লাইভ রাডার</p>
             </div>
-            <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">City Reports</h2>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">সিটি রিপোর্ট</h2>
             <p className="mt-1 text-sm text-slate-500">
-              Showing {filteredReports.length} of {reports.length} active records.
+              {reports.length}টির মধ্যে {filteredReports.length}টি রিপোর্ট দেখানো হচ্ছে।
             </p>
           </div>
 
@@ -250,7 +251,7 @@ export function OpenStreetMapPanel() {
             }}
             className="text-sm font-medium text-slate-500 transition-colors hover:text-cyan-700"
           >
-            Clear Filters
+            ফিল্টার রিসেট
           </button>
         </div>
 
@@ -261,7 +262,7 @@ export function OpenStreetMapPanel() {
               onClick={loadReports}
               className="rounded-lg bg-white px-3 py-1.5 font-medium shadow-sm transition hover:bg-red-50"
             >
-              Retry
+              আবার চেষ্টা করুন
             </button>
           </div>
         )}
@@ -273,10 +274,10 @@ export function OpenStreetMapPanel() {
             onChange={(e) => setDateRangeFilter(e.target.value as any)}
             className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
           >
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="90d">Last 90 Days</option>
-            <option value="all">All Time</option>
+            <option value="7d">শেষ ৭ দিন</option>
+            <option value="30d">শেষ ৩০ দিন</option>
+            <option value="90d">শেষ ৯০ দিন</option>
+            <option value="all">সব সময়</option>
           </select>
 
           <select
@@ -284,11 +285,11 @@ export function OpenStreetMapPanel() {
             onChange={(e) => setCategoryFilter(e.target.value as any)}
             className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
           >
-            <option value="all">All Categories</option>
-            <option value="danger">Danger</option>
-            <option value="help">Help Needs</option>
-            <option value="warning">Warnings</option>
-            <option value="healthy">Healthy/Clear</option>
+            <option value="all">সব ক্যাটাগরি</option>
+            <option value="danger">বিপদ</option>
+            <option value="help">সহায়তা</option>
+            <option value="warning">সতর্কতা</option>
+            <option value="healthy">স্বাভাবিক</option>
           </select>
 
           <select
@@ -296,7 +297,7 @@ export function OpenStreetMapPanel() {
             onChange={(e) => setAreaFilter(e.target.value)}
             className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
           >
-            <option value="all">All Areas</option>
+            <option value="all">সব এলাকা</option>
             {availableAreas.map((area) => (
               <option key={area} value={area}>
                 {area}
@@ -307,18 +308,21 @@ export function OpenStreetMapPanel() {
       </div>
 
       {/* Map Area */}
-      <div className="relative h-[60vh] min-h-[500px] w-full bg-slate-100">
+      <div className="relative h-[68vh] min-h-[560px] w-full overflow-hidden rounded-b-3xl bg-[#0b1220]">
         <OpenStreetMapView reports={filteredReports} onLocationPick={onMapPick} onEditReport={startEdit} />
+
+        <div className="pointer-events-none absolute inset-0 z-[560] bg-[linear-gradient(to_bottom,#00e5ff1a_1px,transparent_1px)] [background-size:100%_18px] opacity-30" />
+        <div className="pointer-events-none absolute inset-0 z-[561] bg-[radial-gradient(circle_at_50%_50%,#00e4ff1a_0%,#00e4ff00_60%)]" />
 
         {/* Floating Centered Badges */}
         <div className="pointer-events-none absolute left-0 right-0 top-6 z-[600] flex justify-center">
           {loadingReports ? (
             <span className="rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-md">
-              Syncing live data...
+              লাইভ ডাটা সিঙ্ক হচ্ছে...
             </span>
           ) : !error && filteredReports.length === 0 ? (
             <span className="rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-md">
-              No reports found in this area.
+              এই এলাকায় কোনো রিপোর্ট পাওয়া যায়নি।
             </span>
           ) : null}
         </div>
@@ -326,12 +330,14 @@ export function OpenStreetMapPanel() {
         {/* Modern FAB */}
         <button
           onClick={startCreate}
-          aria-label="Create report"
+          aria-label="রিপোর্ট তৈরি করুন"
           className="absolute bottom-6 right-6 z-[650] flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-cyan-600 to-emerald-600 text-3xl text-white shadow-lg shadow-cyan-600/30 transition-all hover:scale-105 hover:from-cyan-700 hover:to-emerald-700 active:scale-95"
         >
           +
         </button>
       </div>
+
+      <ReportListPanel reports={reports} loading={loadingReports} error={error} onReportClick={startEdit} />
 
       {/* Modernized Create Modal */}
       {isCreateModalOpen && typeof document !== "undefined"
@@ -346,7 +352,7 @@ export function OpenStreetMapPanel() {
             >
               <section className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
                 <header className="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-                  <h3 className="text-lg font-bold text-slate-900">Pin a new report</h3>
+                  <h3 className="text-lg font-bold text-slate-900">নতুন রিপোর্ট যোগ করুন</h3>
                   <button
                     onClick={() => setIsCreateModalOpen(false)}
                     disabled={createSubmitting}
@@ -366,7 +372,7 @@ export function OpenStreetMapPanel() {
                   <form className="grid gap-4" onSubmit={onSubmitReport}>
                     <input
                       className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
-                      placeholder="What's happening?"
+                      placeholder="কি ঘটেছে?"
                       value={form.title}
                       onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
                       required
@@ -374,7 +380,7 @@ export function OpenStreetMapPanel() {
 
                     <textarea
                       className="min-h-[100px] w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
-                      placeholder="Add more details..."
+                      placeholder="বিস্তারিত লিখুন..."
                       value={form.description}
                       onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                       required
@@ -388,15 +394,15 @@ export function OpenStreetMapPanel() {
                           setForm((prev) => ({ ...prev, category: e.target.value as any }))
                         }
                       >
-                        <option value="danger">Danger</option>
-                        <option value="help">Needs Help</option>
-                        <option value="warning">Warning</option>
-                        <option value="healthy">All Clear</option>
+                        <option value="danger">বিপদ</option>
+                        <option value="help">সহায়তা প্রয়োজন</option>
+                        <option value="warning">সতর্কতা</option>
+                        <option value="healthy">স্বাভাবিক</option>
                       </select>
 
                       <input
                         className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
-                        placeholder="Area Name"
+                        placeholder="এলাকার নাম"
                         value={form.area}
                         onChange={(e) => setForm((prev) => ({ ...prev, area: e.target.value }))}
                         required
@@ -405,7 +411,7 @@ export function OpenStreetMapPanel() {
 
                     <input
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 outline-none"
-                      placeholder="Location Coordinates"
+                      placeholder="লোকেশন কোঅর্ডিনেট"
                       value={form.location}
                       onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
                       readOnly
@@ -416,7 +422,7 @@ export function OpenStreetMapPanel() {
                       {[0, 1, 2].map((idx) => (
                         <div key={idx} className="relative">
                           <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-4 transition hover:border-cyan-400 hover:bg-cyan-50">
-                            <span className="text-xs font-medium text-slate-500">Image {idx + 1}</span>
+                            <span className="text-xs font-medium text-slate-500">ছবি {idx + 1}</span>
                             <input
                               type="file"
                               accept="image/*"
@@ -433,7 +439,7 @@ export function OpenStreetMapPanel() {
                       disabled={createSubmitting}
                       className="mt-4 w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-70"
                     >
-                      {createSubmitting ? "Submitting..." : "Drop Pin"}
+                      {createSubmitting ? "জমা হচ্ছে..." : "রিপোর্ট জমা দিন"}
                     </button>
                   </form>
                 </div>

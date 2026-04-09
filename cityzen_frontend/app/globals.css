@@ -123,3 +123,7 @@ a {
     animation: none;
   }
 }
+
+.cityzen-map .leaflet-tile {
+  filter: saturate(1.18) contrast(1.1) brightness(0.97);
+}

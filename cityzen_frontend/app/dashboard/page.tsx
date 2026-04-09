@@ -74,7 +74,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="grid min-h-[100dvh] place-items-center bg-[radial-gradient(circle_at_8%_15%,#deebff_0%,#deebff00_45%),radial-gradient(circle_at_95%_5%,#d4e4ff_0%,#d4e4ff00_42%),linear-gradient(145deg,#f8faff_0%,#eef3ff_52%,#e8efff_100%)] px-4 py-8">
+      <main className="grid min-h-[100dvh] place-items-center px-4 py-8">
         <p>Loading dashboard...</p>
       </main>
     );
@@ -82,7 +82,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <main className="grid min-h-[100dvh] place-items-center bg-[radial-gradient(circle_at_8%_15%,#deebff_0%,#deebff00_45%),radial-gradient(circle_at_95%_5%,#d4e4ff_0%,#d4e4ff00_42%),linear-gradient(145deg,#f8faff_0%,#eef3ff_52%,#e8efff_100%)] px-4 py-8">
+      <main className="grid min-h-[100dvh] place-items-center px-4 py-8">
         <div className="w-[min(860px,96%)] rounded-[22px] border border-[#d9e1ff] bg-white p-[clamp(1.1rem,2.2vw,1.9rem)] shadow-[0_24px_58px_#203a8f1f]">
           <h1>Dashboard unavailable</h1>
           <p>{error}</p>
@@ -98,7 +98,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="grid min-h-[100dvh] place-items-center bg-[radial-gradient(circle_at_8%_15%,#deebff_0%,#deebff00_45%),radial-gradient(circle_at_95%_5%,#d4e4ff_0%,#d4e4ff00_42%),linear-gradient(145deg,#f8faff_0%,#eef3ff_52%,#e8efff_100%)] px-4 py-8">
+    <main className="grid min-h-[100dvh] place-items-center px-4 py-8">
       <section className="w-[min(860px,96%)] rounded-[22px] border border-[#d9e1ff] bg-white p-[clamp(1.1rem,2.2vw,1.9rem)] shadow-[0_24px_58px_#203a8f1f]">
         <div className="mb-5 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div>

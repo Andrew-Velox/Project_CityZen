@@ -35,8 +35,7 @@ const milestones = [
 
 export default function AboutPage() {
   return (
-    <main className="relative min-h-[calc(100dvh-5.5rem)] overflow-hidden bg-[radial-gradient(circle_at_6%_8%,#dbe8ff_0%,#dbe8ff00_44%),radial-gradient(circle_at_95%_20%,#d5e7ff_0%,#d5e7ff00_40%),linear-gradient(145deg,#f8faff_0%,#eef3ff_54%,#e8efff_100%)] px-3 pb-6 md:px-4 md:pb-8">
-      <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,#d8dee8_1px,transparent_1px),linear-gradient(to_bottom,#d8dee8_1px,transparent_1px)] [background-size:34px_34px]" />
+    <main className="relative min-h-[calc(100dvh-5.5rem)] overflow-hidden px-3 pb-6 md:px-4 md:pb-8">
 
       <section className="relative mx-auto w-full max-w-6xl pt-6 md:pt-9">
         <div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr] md:gap-6">
