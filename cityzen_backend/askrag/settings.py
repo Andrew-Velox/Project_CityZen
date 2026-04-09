@@ -18,12 +18,30 @@ SECRET_KEY = 'django-insecure-ili7lgje!gw6y6y717*@p6ptj_t4_5c(hxu1uaw7tb$=*zdha6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = [
-    # 'https://my-django-template.onrender.com',
-    'https://*.127.0.0.1',
+def env_list(name: str, default: list[str]) -> list[str]:
+    value = os.getenv(name)
+    if not value:
+        return default
+    return [item.strip() for item in value.split(",") if item.strip()]
 
-    ]
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://project-city-zen.vercel.app").rstrip("/")
+BACKEND_URL = os.getenv("BACKEND_URL", "https://project-cityzen.onrender.com").rstrip("/")
+
+ALLOWED_HOSTS = env_list(
+    "ALLOWED_HOSTS",
+    ["127.0.0.1", "localhost", "project-cityzen.onrender.com"],
+)
+
+CSRF_TRUSTED_ORIGINS = env_list(
+    "CSRF_TRUSTED_ORIGINS",
+    [
+        FRONTEND_URL,
+        BACKEND_URL,
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+)
 
 # Application definition
 
@@ -66,14 +84,24 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'askrag.urls'
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://localhost:3002",
-    
-    "http://127.0.0.1:3000",
+    *env_list(
+        "CORS_ALLOWED_ORIGINS",
+        [
+            FRONTEND_URL,
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:3001",
+            "http://localhost:3002",
+        ],
+    ),
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOW_CREDENTIALS = True
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 
 
@@ -194,7 +222,7 @@ SPECTACULAR_SETTINGS = {
 
     # Optional extra info
     'SERVERS': [
-        {'url': 'https://my-django-template.onrender.com', 'description': 'Production server'},
+        {'url': BACKEND_URL, 'description': 'Production server'},
         {'url': 'http://127.0.0.1:8000', 'description': 'Local development'},
     ],
 

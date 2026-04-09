@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
     dangerouslyAllowLocalIP: true,
     remotePatterns: [
       {
+        protocol: "https",
+        hostname: "project-cityzen.onrender.com",
+      },
+      {
         protocol: "http",
         hostname: "127.0.0.1",
         port: "8000",
