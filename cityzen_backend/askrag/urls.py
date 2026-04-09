@@ -18,7 +18,7 @@ urlpatterns = [
     path('' , SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
 
-    path('user/',include('rag_user.urls')),
+    path('user/',include('user_cs.urls')),
     path('report/',include('report_cz.urls')),
     path('faq/',include('faq_cz.urls')),
 

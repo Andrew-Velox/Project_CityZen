@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django_filters',
 
 
-    'rag_user',
+    'user_cs.apps.UserCsConfig',
     'report_cz',
     'faq_cz',
 

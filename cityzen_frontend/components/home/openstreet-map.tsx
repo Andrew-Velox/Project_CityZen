@@ -32,6 +32,8 @@ export function OpenStreetMapPanel() {
   const [editError, setEditError] = useState<string | null>(null);
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [editSubmitting, setEditSubmitting] = useState(false);
+  const [focusLocation, setFocusLocation] = useState<string | null>(null);
+  const [focusRequestKey, setFocusRequestKey] = useState(0);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -227,6 +229,11 @@ export function OpenStreetMapPanel() {
     }
   }
 
+  function onReportListClick(report: Report) {
+    setFocusLocation(report.location);
+    setFocusRequestKey((prev) => prev + 1);
+  }
+
   return (
     <section className="mt-6 flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/40 backdrop-blur-md shadow-xl shadow-slate-200/30">
       {/* Header & Filter Toolbar */}
@@ -309,7 +316,13 @@ export function OpenStreetMapPanel() {
 
       {/* Map Area */}
       <div className="relative h-[68vh] min-h-[560px] w-full overflow-hidden rounded-b-3xl bg-[#0b1220]">
-        <OpenStreetMapView reports={filteredReports} onLocationPick={onMapPick} onEditReport={startEdit} />
+        <OpenStreetMapView
+          reports={filteredReports}
+          onLocationPick={onMapPick}
+          onEditReport={startEdit}
+          focusLocation={focusLocation}
+          focusRequestKey={focusRequestKey}
+        />
 
         <div className="pointer-events-none absolute inset-0 z-[560] bg-[linear-gradient(to_bottom,#00e5ff1a_1px,transparent_1px)] [background-size:100%_18px] opacity-30" />
         <div className="pointer-events-none absolute inset-0 z-[561] bg-[radial-gradient(circle_at_50%_50%,#00e4ff1a_0%,#00e4ff00_60%)]" />
@@ -337,7 +350,7 @@ export function OpenStreetMapPanel() {
         </button>
       </div>
 
-      <ReportListPanel reports={reports} loading={loadingReports} error={error} onReportClick={startEdit} />
+      <ReportListPanel reports={reports} loading={loadingReports} error={error} onReportClick={onReportListClick} />
 
       {/* Modernized Create Modal */}
       {isCreateModalOpen && typeof document !== "undefined"

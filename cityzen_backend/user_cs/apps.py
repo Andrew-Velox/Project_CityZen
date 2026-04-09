@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
 
-class RagUserConfig(AppConfig):
+class UserCsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'rag_user'
+    name = 'user_cs'
+    label = 'rag_user'
