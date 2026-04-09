@@ -30,11 +30,19 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      <body suppressHydrationWarning className="flex min-h-dvh flex-col overflow-x-hidden">
-        <div className="relative z-[2500] px-3 pt-3 md:px-4 md:pt-4">
-          <CityNavbar />
+      <body suppressHydrationWarning className="relative flex min-h-dvh flex-col overflow-x-hidden bg-transparent">
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+          <div className="absolute inset-0 bg-[linear-gradient(140deg,#f5fcfb_0%,#e8f6ff_52%,#e0f4ef_100%)]" />
+          <div className="home-aurora-orb home-aurora-orb--one" />
+          <div className="home-aurora-orb home-aurora-orb--two" />
+          <div className="home-aurora-orb home-aurora-orb--three" />
+          <div className="home-aurora-sheen" />
         </div>
-        <div className="min-h-0 flex-1">{children}</div>
+
+        <div className="relative z-10 flex min-h-dvh flex-col">
+          <CityNavbar />
+          <div className="min-h-0 flex-1">{children}</div>
+        </div>
       </body>
     </html>
   );

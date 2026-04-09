@@ -7,6 +7,9 @@ from .models import Comment, Report, ReportImage
 
 class ReportSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source="author.username", read_only=True)
+    author_username = serializers.CharField(source="author.username", read_only=True)
+    author_image = serializers.SerializerMethodField(read_only=True)
+    author_profile_url = serializers.SerializerMethodField(read_only=True)
     images = serializers.SerializerMethodField(read_only=True)
     image_items = serializers.SerializerMethodField(read_only=True)
     upload_images = serializers.ListField(
@@ -22,6 +25,9 @@ class ReportSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "author",
+            "author_username",
+            "author_image",
+            "author_profile_url",
             "title",
             "description",
             "category",
@@ -37,6 +43,31 @@ class ReportSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "author", "status", "created_at", "updated_at"]
+
+    def _as_absolute_url(self, path: str):
+        request = self.context.get("request")
+        if request is None:
+            return path
+        return request.build_absolute_uri(path)
+
+    def get_author_image(self, obj):
+        image = getattr(obj.author, "image", None)
+        if not image:
+            return None
+
+        try:
+            if not image.storage.exists(image.name):
+                return None
+        except Exception:
+            return None
+
+        return self._as_absolute_url(image.url)
+
+    def get_author_profile_url(self, obj):
+        username = getattr(obj.author, "username", "")
+        if not username:
+            return None
+        return f"/profile?user={username}"
 
     def get_images(self, obj):
         urls = []
@@ -149,11 +180,50 @@ class ReportSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source="author.username", read_only=True)
+    author_username = serializers.CharField(source="author.username", read_only=True)
+    author_image = serializers.SerializerMethodField(read_only=True)
+    author_profile_url = serializers.SerializerMethodField(read_only=True)
     parent = serializers.PrimaryKeyRelatedField(
         queryset=Comment.objects.all(), required=False, allow_null=True, default=None
     )
 
     class Meta:
         model = Comment
-        fields = ["id", "author", "report", "parent", "content", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "author",
+            "author_username",
+            "author_image",
+            "author_profile_url",
+            "report",
+            "parent",
+            "content",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = ["id", "author", "report", "created_at", "updated_at"]
+
+    def _as_absolute_url(self, path: str):
+        request = self.context.get("request")
+        if request is None:
+            return path
+        return request.build_absolute_uri(path)
+
+    def get_author_image(self, obj):
+        image = getattr(obj.author, "image", None)
+        if not image:
+            return None
+
+        try:
+            if not image.storage.exists(image.name):
+                return None
+        except Exception:
+            return None
+
+        return self._as_absolute_url(image.url)
+
+    def get_author_profile_url(self, obj):
+        username = getattr(obj.author, "username", "")
+        if not username:
+            return None
+        return f"/profile?user={username}"

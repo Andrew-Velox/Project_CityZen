@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3f5ff;
+  --background: #f0f8f8;
   --foreground: #111827;
   --surface: #ffffff;
-  --surface-muted: #eef2ff;
-  --border: #d9e1ff;
-  --primary: #1d4ed8;
-  --primary-strong: #1e40af;
+  --surface-muted: #e9f7f7;
+  --border: #c8e2e3;
+  --primary: #0f6fe8;
+  --primary-strong: #0a57be;
   --text-soft: #475569;
   --danger: #b42318;
   --danger-bg: #fef3f2;
   --danger-border: #fecdca;
-  --success: #027a48;
-  --success-bg: #ecfdf3;
-  --success-border: #abefc6;
+  --success: #0d8f61;
+  --success-bg: #e9faf3;
+  --success-border: #a7e7ce;
 }
 
 @theme inline {
@@ -34,4 +34,92 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+.home-aurora-orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(68px);
+  will-change: transform, opacity;
+  animation: home-aurora-float 16s ease-in-out infinite;
+}
+
+.home-aurora-orb--one {
+  left: -14%;
+  top: -18%;
+  height: 52%;
+  width: 52%;
+  background: radial-gradient(circle at 35% 30%, #95dcff 0%, #55b8ff 44%, #55b8ff00 80%);
+  opacity: 0.72;
+}
+
+.home-aurora-orb--two {
+  right: -16%;
+  top: 8%;
+  height: 44%;
+  width: 44%;
+  background: radial-gradient(circle at 60% 40%, #bdf1ea 0%, #67d8c5 48%, #67d8c500 80%);
+  opacity: 0.66;
+  animation-duration: 19s;
+  animation-delay: -3s;
+}
+
+.home-aurora-orb--three {
+  left: 14%;
+  bottom: -26%;
+  height: 62%;
+  width: 62%;
+  background: radial-gradient(circle at 45% 45%, #9de8de 0%, #44c6b3 46%, #44c6b300 80%);
+  opacity: 0.62;
+  animation-duration: 22s;
+  animation-delay: -7s;
+}
+
+.home-aurora-sheen {
+  position: absolute;
+  inset: -35% -20%;
+  background:
+    radial-gradient(circle at 20% 20%, #ffffff8f 0%, #ffffff00 44%),
+    linear-gradient(120deg, #ffffff00 12%, #ffffff4a 42%, #ffffff00 68%);
+  mix-blend-mode: screen;
+  opacity: 0.44;
+  will-change: transform;
+  animation: home-aurora-sweep 20s linear infinite;
+}
+
+@keyframes home-aurora-float {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  25% {
+    transform: translate3d(2.2%, -2%, 0) scale(1.03);
+  }
+  50% {
+    transform: translate3d(-2.4%, 1.8%, 0) scale(0.98);
+  }
+  75% {
+    transform: translate3d(1.5%, 2.4%, 0) scale(1.02);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes home-aurora-sweep {
+  0% {
+    transform: translate3d(-8%, 0, 0) rotate(0.001deg);
+  }
+  50% {
+    transform: translate3d(8%, -3%, 0) rotate(0.001deg);
+  }
+  100% {
+    transform: translate3d(-8%, 0, 0) rotate(0.001deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-aurora-orb,
+  .home-aurora-sheen {
+    animation: none;
+  }
 }

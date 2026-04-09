@@ -11,14 +11,14 @@ from .serializers import CommentSerializer, ReportSerializer
 
 
 class ReportViewSet(viewsets.ModelViewSet):
-    queryset = Report.objects.all()
+    queryset = Report.objects.select_related("author").prefetch_related("images").all()
     serializer_class = ReportSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     @action(detail=False, methods=["get"], url_path=r"user/(?P<user_id>[0-9]+)")
     def by_user(self, request, user_id=None):
-        reports = Report.objects.filter(author__id=user_id)
+        reports = Report.objects.select_related("author").prefetch_related("images").filter(author__id=user_id)
         serializer = self.get_serializer(reports, many=True)
         return Response(serializer.data)
 
@@ -37,15 +37,15 @@ class ReportViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.select_related("author", "report").all()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         report_id = self.kwargs.get("report_id")
         if report_id:
-            return Comment.objects.filter(report_id=report_id)
-        return Comment.objects.all()
+            return Comment.objects.select_related("author", "report").filter(report_id=report_id)
+        return Comment.objects.select_related("author", "report").all()
 
     def perform_create(self, serializer):
         report_id = self.kwargs.get("report_id")
