@@ -17,12 +17,16 @@ export async function apiRequest<T>(
   const timeoutMs = options.timeoutMs ?? 12000;
   const timeoutId = globalThis.setTimeout(() => controller.abort(), timeoutMs);
 
-  const requestBody =
-    options.body === undefined
-      ? undefined
-      : isFormData
-        ? options.body
-        : JSON.stringify(options.body);
+  let requestBody: BodyInit | null | undefined;
+  if (options.body === undefined) {
+    requestBody = undefined;
+  } else if (options.body === null) {
+    requestBody = null;
+  } else if (options.body instanceof FormData) {
+    requestBody = options.body;
+  } else {
+    requestBody = JSON.stringify(options.body);
+  }
 
   let response: Response;
 
