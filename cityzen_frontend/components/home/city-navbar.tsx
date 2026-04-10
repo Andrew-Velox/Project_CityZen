@@ -144,7 +144,14 @@ export function CityNavbar() {
       >
         {/* Logo */}
         <Link href="/" className="inline-flex items-center gap-2 font-extrabold tracking-[0.01em] text-[#0f172a]">
-          <span className="h-[10px] w-[10px] rounded-full bg-gradient-to-br from-[#1f4fd7] to-[#2f5c7c]" />
+          <Image
+            src="/logo.png"
+            alt="CityZen logo"
+            width={34}
+            height={34}
+            priority
+            className="h-[34px] w-[34px] rounded-lg object-contain"
+          />
           CityZen
         </Link>
 
