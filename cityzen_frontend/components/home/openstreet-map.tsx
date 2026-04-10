@@ -237,15 +237,15 @@ export function OpenStreetMapPanel() {
   return (
     <section className="mt-6 flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/40 backdrop-blur-md shadow-xl shadow-slate-200/30">
       {/* Header & Filter Toolbar */}
-      <div className="border-b border-slate-200/70 bg-white/22 p-5 md:p-6 backdrop-blur-sm">
-        <div className="mb-5 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <div className="border-b border-slate-200/70 bg-white/30 px-4 py-3 md:px-5 md:py-4 backdrop-blur-sm">
+        <div className="mb-3 flex flex-col justify-between gap-2.5 sm:flex-row sm:items-center">
           <div>
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-              <p className="font-mono text-xs font-semibold uppercase tracking-wider text-slate-500">লাইভ রাডার</p>
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-500">লাইভ রাডার</p>
             </div>
-            <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">সিটি রিপোর্ট</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="mt-0.5 text-xl font-bold tracking-tight text-slate-900">সিটি রিপোর্ট</h2>
+            <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
               {reports.length}টির মধ্যে {filteredReports.length}টি রিপোর্ট দেখানো হচ্ছে।
             </p>
           </div>
@@ -256,14 +256,14 @@ export function OpenStreetMapPanel() {
               setCategoryFilter("all");
               setAreaFilter("all");
             }}
-            className="text-sm font-medium text-slate-500 transition-colors hover:text-cyan-700"
+            className="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white/80 px-3 text-sm font-medium text-slate-600 transition-all hover:border-cyan-300 hover:text-cyan-700"
           >
             ফিল্টার রিসেট
           </button>
         </div>
 
         {error && (
-          <div className="mb-5 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="mb-3 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
             <p className="font-semibold">{error}</p>
             <button
               onClick={loadReports}
@@ -275,11 +275,11 @@ export function OpenStreetMapPanel() {
         )}
 
         {/* Compact Filters */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
           <select
             value={dateRangeFilter}
             onChange={(e) => setDateRangeFilter(e.target.value as any)}
-            className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
+            className="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white/95 px-3.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
           >
             <option value="7d">শেষ ৭ দিন</option>
             <option value="30d">শেষ ৩০ দিন</option>
@@ -290,7 +290,7 @@ export function OpenStreetMapPanel() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as any)}
-            className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
+            className="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white/95 px-3.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
           >
             <option value="all">সব ক্যাটাগরি</option>
             <option value="danger">বিপদ</option>
@@ -302,7 +302,7 @@ export function OpenStreetMapPanel() {
           <select
             value={areaFilter}
             onChange={(e) => setAreaFilter(e.target.value)}
-            className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
+            className="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white/95 px-3.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10"
           >
             <option value="all">সব এলাকা</option>
             {availableAreas.map((area) => (
