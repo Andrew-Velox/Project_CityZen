@@ -50,6 +50,7 @@ export type UserProfile = {
   gender: string | null;
   birth_date: string | null;
   is_verified: boolean;
+  is_staff?: boolean;
 };
 
 export type UpdateProfileRequest = {
@@ -134,4 +135,53 @@ export type FaqItem = {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+};
+
+export type CommunityGroup = {
+  id: number;
+  group_name: string;
+  groupchat_name: string | null;
+  admin: number | null;
+  admin_username: string | null;
+  members: number[];
+  users_online: number[];
+  is_private: boolean;
+  banner: string | null;
+  banner_url: string | null;
+  created_at: string;
+};
+
+export type CommunityGroupCreateRequest = {
+  groupchat_name: string;
+  is_private?: boolean;
+  banner?: File | null;
+};
+
+export type CommunityMessage = {
+  id: number;
+  message_uuid: string;
+  group: number;
+  author: number;
+  author_username: string;
+  author_image?: string | null;
+  author_profile_url?: string | null;
+  body: string | null;
+  file: string | null;
+  voice_note: string | null;
+  duration: number | null;
+  created: string;
+  delete_msg: boolean;
+  deleted_at: string | null;
+  seen_by: number[];
+  seen_count: number;
+  is_seen_by_me: boolean;
+  filename: string | null;
+  is_image: boolean;
+};
+
+export type CommunityMessageCreateRequest = {
+  body?: string;
+  file?: File | null;
+  voice_note?: File | null;
+  duration?: number | null;
 };

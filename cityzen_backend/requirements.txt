@@ -8,3 +8,5 @@ python-docx
 django-filter
 drf-spectacular
 Pillow
+channels
+daphne

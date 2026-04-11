@@ -58,11 +58,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'channels',
 
 
     'user_cs.apps.UserCsConfig',
     'report_cz',
     'faq_cz',
+    'community_cz.apps.CommunityCzConfig',
 
 ]
 
@@ -121,6 +123,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'askrag.wsgi.application'
+ASGI_APPLICATION = 'askrag.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
+}
 
 
 # Database

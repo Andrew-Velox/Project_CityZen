@@ -21,6 +21,7 @@ urlpatterns = [
     path('user/',include('user_cs.urls')),
     path('report/',include('report_cz.urls')),
     path('faq/',include('faq_cz.urls')),
+    path('community/',include('community_cz.urls')),
 
 ] 
 

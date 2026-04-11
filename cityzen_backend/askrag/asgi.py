@@ -9,8 +9,18 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 
 import os
 
-from django.core.asgi import get_asgi_application
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'askrag.settings')
 
-application = get_asgi_application()
+from django.core.asgi import get_asgi_application
+django_asgi_app = get_asgi_application()
+
+from channels.routing import ProtocolTypeRouter, URLRouter
+from askrag.routing import websocket_urlpatterns
+from community_cz.middleware import JwtAuthMiddlewareStack
+
+application = ProtocolTypeRouter(
+    {
+        "http": django_asgi_app,
+        "websocket": JwtAuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
+    }
+)

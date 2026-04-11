@@ -1,0 +1,1 @@
+from community_cz.routing import websocket_urlpatterns
