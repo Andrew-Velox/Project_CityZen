@@ -16,7 +16,7 @@ import { getMyProfile, refreshAccessToken } from "@/lib/api/auth";
 import { API_BASE_URL } from "@/config/api";
 import { ApiError, type CommunityGroup, type CommunityMessage, type UserProfile } from "@/lib/api/types";
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token-store";
-import { Send, LogOut, RefreshCw, Plus, Trash2, Paperclip, Users, ShieldCheck } from "lucide-react";
+import { Send, LogOut, RefreshCw, Plus, Trash2, Paperclip, Users, ShieldCheck, Menu, X } from "lucide-react";
 
 // --- Utility Functions ---
 function toAbsoluteUrl(path: string | null) {
@@ -66,6 +66,7 @@ export default function CommunityPage() {
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [navbarOffset, setNavbarOffset] = useState(104);
   const [wsConnected, setWsConnected] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -331,23 +332,45 @@ export default function CommunityPage() {
 
   return (
     <main
-      className="relative flex w-full flex-col overflow-hidden bg-[radial-gradient(130%_90%_at_10%_0%,#cffafe_0%,#e0f2fe_35%,#eef2ff_75%,#f8fafc_100%)] p-2 md:p-3"
+      className="relative flex w-full flex-col overflow-hidden bg-[radial-gradient(130%_90%_at_10%_0%,#cffafe_0%,#e0f2fe_35%,#eef2ff_75%,#f8fafc_100%)] p-1.5 md:p-3"
       style={{ height: `calc(100dvh - ${navbarOffset}px)` }}
     >
       <div className="pointer-events-none absolute -left-20 -top-24 h-72 w-72 rounded-full bg-cyan-300/30 blur-3xl" />
       <div className="pointer-events-none absolute -right-16 top-24 h-80 w-80 rounded-full bg-blue-300/25 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-90px] left-1/3 h-80 w-80 rounded-full bg-emerald-200/30 blur-3xl" />
 
-      <div className="relative flex h-full w-full flex-1 overflow-hidden rounded-[2rem] border border-white/80 bg-white/65 shadow-[0_24px_70px_rgba(15,23,42,0.18)] backdrop-blur-xl">
+      <div className="relative flex h-full w-full flex-1 overflow-hidden rounded-2xl border border-white/80 bg-white/65 shadow-[0_24px_70px_rgba(15,23,42,0.18)] backdrop-blur-xl md:rounded-[2rem]">
+
+        {mobileSidebarOpen && (
+          <button
+            type="button"
+            aria-label="Close groups panel"
+            onClick={() => setMobileSidebarOpen(false)}
+            className="absolute inset-0 z-20 bg-slate-900/35 md:hidden"
+          />
+        )}
         
         {/* Sidebar */}
-        <aside className="hidden w-80 flex-col border-r border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.78)_0%,rgba(241,245,249,0.72)_100%)] md:flex">
+        <aside
+          className={`absolute inset-y-0 left-0 z-30 flex w-[84vw] max-w-80 flex-col border-r border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.95)_0%,rgba(241,245,249,0.9)_100%)] transition-transform duration-200 md:static md:z-0 md:w-80 md:max-w-none md:translate-x-0 ${
+            mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
           <div className="p-6">
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-black tracking-tight text-slate-800">Messages</h1>
-              <button onClick={loadGroups} className="text-slate-400 hover:text-cyan-600 transition-colors">
-                <RefreshCw size={18} className={groupsLoading ? "animate-spin" : ""} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={loadGroups} className="text-slate-400 transition-colors hover:text-cyan-600">
+                  <RefreshCw size={18} className={groupsLoading ? "animate-spin" : ""} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="text-slate-500 transition-colors hover:text-slate-800 md:hidden"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
             
             {/* Create Group (Staff only) */}
@@ -372,7 +395,10 @@ export default function CommunityPage() {
             {groups.map((group) => (
               <button
                 key={group.id}
-                onClick={() => setSelectedGroupId(group.id)}
+                onClick={() => {
+                  setSelectedGroupId(group.id);
+                  setMobileSidebarOpen(false);
+                }}
                 className={`group flex w-full flex-col gap-1 rounded-2xl px-4 py-3 transition-all ${
                   selectedGroupId === group.id 
                   ? "bg-cyan-600 text-white shadow-lg shadow-cyan-200" 
@@ -419,11 +445,11 @@ export default function CommunityPage() {
         </aside>
 
         {/* Chat Area */}
-        <section className="flex flex-1 flex-col bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)]">
+        <section className="flex min-w-0 flex-1 flex-col bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)]">
           {selectedGroup ? (
             <>
               {/* Chat Header */}
-              <header className="relative flex items-center justify-between overflow-hidden border-b border-slate-50 px-6 py-4">
+              <header className="relative flex items-center justify-between overflow-hidden border-b border-slate-50 px-3 py-3 md:px-6 md:py-4">
                 {getGroupBannerUrl(selectedGroup) && (
                   <>
                     <img
@@ -434,8 +460,15 @@ export default function CommunityPage() {
                     <div className="absolute inset-0 bg-white/70" />
                   </>
                 )}
-                <div className="flex items-center gap-3">
-                  <div className="relative z-10 flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-cyan-100 text-cyan-700 font-bold">
+                <div className="flex min-w-0 items-center gap-2 md:gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setMobileSidebarOpen(true)}
+                    className="relative z-10 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white/90 text-slate-700 md:hidden"
+                  >
+                    <Menu size={18} />
+                  </button>
+                  <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-cyan-100 text-cyan-700 font-bold md:h-10 md:w-10">
                     {getGroupBannerUrl(selectedGroup) ? (
                       <img
                         src={getGroupBannerUrl(selectedGroup) as string}
@@ -446,14 +479,14 @@ export default function CommunityPage() {
                       (selectedGroup.groupchat_name || selectedGroup.group_name).slice(0, 1).toUpperCase()
                     )}
                   </div>
-                  <div className="relative z-10">
-                    <h2 className="font-bold text-slate-800">{selectedGroup.groupchat_name}</h2>
+                  <div className="relative z-10 min-w-0">
+                    <h2 className="truncate text-sm font-bold text-slate-800 md:text-base">{selectedGroup.groupchat_name}</h2>
                     <p className="text-xs text-emerald-500 font-medium">{selectedGroup.users_online.length} Active Now</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => amMember ? leaveCommunityGroup(selectedGroup.id, getAccessToken()!) : joinCommunityGroup(selectedGroup.id, getAccessToken()!)}
-                  className={`relative z-10 rounded-full px-5 py-2 text-xs font-bold transition-all ${
+                  className={`relative z-10 shrink-0 rounded-full px-3 py-2 text-[11px] font-bold transition-all md:px-5 md:text-xs ${
                     amMember ? "bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600" : "bg-cyan-600 text-white hover:bg-cyan-700"
                   }`}
                 >
@@ -464,14 +497,14 @@ export default function CommunityPage() {
               {/* Messages Container */}
               <div 
                 ref={scrollRef}
-                className="flex-1 space-y-6 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.35)_0%,rgba(226,232,240,0.28)_100%)] p-4 md:p-6"
+                className="flex-1 space-y-4 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,0.35)_0%,rgba(226,232,240,0.28)_100%)] p-3 md:space-y-6 md:p-6"
               >
                 {messages.map((message) => {
                   const isMine = profile?.id === message.author;
                   const authorImageUrl = toAbsoluteUrl(message.author_image || null);
                   return (
                     <div key={message.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                      <div className={`group relative flex max-w-[88%] items-end gap-2 md:max-w-[68%] ${isMine ? "flex-row-reverse" : ""}`}>
+                      <div className={`group relative flex max-w-[96%] items-end gap-2 sm:max-w-[90%] md:max-w-[68%] ${isMine ? "flex-row-reverse" : ""}`}>
                         <Link
                           href={getProfileHref(message)}
                           className="mb-1 inline-flex h-9 w-9 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm transition-transform hover:scale-105"
@@ -544,20 +577,20 @@ export default function CommunityPage() {
               </div>
 
               {/* Input Area */}
-              <footer className="p-4 bg-white border-t border-slate-50">
-                <form onSubmit={onSend} className="flex items-center gap-2 max-w-4xl mx-auto">
+              <footer className="border-t border-slate-50 bg-white p-3 md:p-4">
+                <form onSubmit={onSend} className="mx-auto flex max-w-4xl items-center gap-2">
                   <div className="relative flex-1">
                     <input
                       value={composer}
                       onChange={(e) => setComposer(e.target.value)}
                       placeholder={amMember ? "Write your message..." : "Join group to chat"}
                       disabled={!amMember || sending}
-                      className="w-full rounded-2xl border-none bg-slate-100 py-3.5 pl-5 pr-12 text-sm focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50"
+                      className="w-full rounded-2xl border-none bg-slate-100 py-3 pl-4 pr-12 text-sm focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-50 md:py-3.5 md:pl-5"
                     />
                   </div>
                   <button
                     disabled={!amMember || !composer.trim() || sending}
-                    className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-600 text-white shadow-lg shadow-cyan-200 transition-all hover:bg-cyan-700 disabled:grayscale disabled:opacity-50"
+                    className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-600 text-white shadow-lg shadow-cyan-200 transition-all hover:bg-cyan-700 disabled:grayscale disabled:opacity-50 md:h-12 md:w-12"
                   >
                     <Send size={20} />
                   </button>
