@@ -123,7 +123,7 @@ function parseLocation(location: string): [number, number] | null {
   return [parts[0], parts[1]];
 }
 
-type OpenStreetMapViewProps = {
+type CityMapViewProps = {
   reports: Report[];
   onLocationPick?: (lat: number, lng: number) => void;
   onEditReport?: (report: Report) => void;
@@ -132,13 +132,13 @@ type OpenStreetMapViewProps = {
 };
 
 // --- Main Component ---
-export default function OpenStreetMapView({
+export default function CityMapView({
   reports,
   onLocationPick,
   onEditReport,
   focusLocation,
   focusRequestKey = 0,
-}: OpenStreetMapViewProps) {
+}: CityMapViewProps) {
   const [selectedPosition, setSelectedPosition] = useState<[number, number]>(dhakaPosition);
   const [detailsReport, setDetailsReport] = useState<Report | null>(null);
   const [comments, setComments] = useState<ReportComment[]>([]);

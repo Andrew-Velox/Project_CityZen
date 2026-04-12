@@ -10,7 +10,7 @@ import { ApiError, type Report } from "@/lib/api/types";
 import ReportEditModal, { type ReportEditSubmitPayload } from "@/components/report/report-edit-modal";
 import ReportListPanel from "@/components/report/report-list-panel";
 
-const OpenStreetMapView = dynamic(() => import("@/components/home/openstreet-map-view"), {
+const CityMapView = dynamic(() => import("@/components/home/city-map-view"), {
   ssr: false,
   loading: () => (
     <div className="grid h-full min-h-[400px] w-full place-items-center bg-slate-50 text-sm font-medium text-slate-500 animate-pulse">
@@ -19,7 +19,7 @@ const OpenStreetMapView = dynamic(() => import("@/components/home/openstreet-map
   ),
 });
 
-export function OpenStreetMapPanel() {
+export function CityMapPanel() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -316,7 +316,7 @@ export function OpenStreetMapPanel() {
 
       {/* Map Area */}
       <div className="relative h-[68vh] min-h-[560px] w-full overflow-hidden rounded-b-3xl bg-[#0b1220]">
-        <OpenStreetMapView
+        <CityMapView
           reports={filteredReports}
           onLocationPick={onMapPick}
           onEditReport={startEdit}
