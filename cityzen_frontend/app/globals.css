@@ -24,6 +24,43 @@
   --font-mono: var(--font-ibm-plex-mono);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
+html,
+body,
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #8faac1 transparent;
+  
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #8faac1;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #7f9bb4;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

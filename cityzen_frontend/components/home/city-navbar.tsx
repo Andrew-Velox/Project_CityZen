@@ -143,12 +143,12 @@ export function CityNavbar() {
       className={`${
         isHomeRoute
           ? "absolute inset-x-0 top-0 z-[2800] w-full bg-transparent"
-          : "sticky top-0 z-[2200] mx-auto w-full shrink-0 bg-transparent"
+          : "sticky top-0 z-[2200] w-full shrink-0 bg-transparent"
       } transition-all`}
       ref={navRef}
     >
       <nav
-        className="relative z-[2201] mx-4 mt-4 flex items-center justify-between gap-3 rounded-3xl border border-[#c5d7ea99] bg-[#e9f5ff3b] px-4 py-3 shadow-[0_10px_26px_#1528481a] backdrop-blur-[14px]"
+        className="relative z-[2201] mx-auto mt-4 flex w-[calc(100%-1.5rem)] max-w-6xl items-center justify-between gap-3 rounded-3xl border border-[#c5d7ea99] bg-[#e9f5ff3b] px-4 py-3 shadow-[0_10px_26px_#1528481a] backdrop-blur-[14px] sm:w-[calc(100%-2rem)]"
         aria-label="Main navigation"
       >
         {/* Logo */}
