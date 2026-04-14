@@ -18,6 +18,8 @@ const CityMapView = dynamic(() => import("@/components/home/city-map-view"), {
   ),
 });
 
+const MOCK_REPORTS: Report[] = [];
+
 export function CityMapPanel() {
   const [reports, setReports] = useState<Report[]>([]);
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
@@ -30,6 +32,7 @@ export function CityMapPanel() {
   const [editingReport, setEditingReport] = useState<Report | null>(null);
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [editSubmitting, setEditSubmitting] = useState(false);
+  const [gpsLoading, setGpsLoading] = useState(false);
   const [focusLocation, setFocusLocation] = useState<string | null>(null);
   const [focusRequestKey, setFocusRequestKey] = useState(0);
 
@@ -61,6 +64,35 @@ export function CityMapPanel() {
     setCreateError(null);
   };
 
+  // --- GPS Location Helper ---
+  const openCreateModalWithGPS = () => {
+    resetForm();
+
+    if (!navigator.geolocation) {
+      // Browser doesn't support geolocation — open modal with empty location
+      setCreateError("Your browser does not support GPS. Please click on the map to set the location.");
+      setIsCreateModalOpen(true);
+      return;
+    }
+
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setForm((prev) => ({ ...prev, location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` }));
+        setGpsLoading(false);
+        setIsCreateModalOpen(true);
+      },
+      (_err) => {
+        // User denied or GPS failed — open modal anyway so they can pick from map
+        setGpsLoading(false);
+        setCreateError("Could not get your GPS location. Please tap a point on the map to set the coordinates.");
+        setIsCreateModalOpen(true);
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
+  };
+
   // --- Data Fetching ---
 
   const loadReports = async () => {
@@ -68,9 +100,10 @@ export function CityMapPanel() {
     setError(null);
     try {
       const data = await getReports();
-      setReports(data);
+      setReports([...MOCK_REPORTS, ...data]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load reports.");
+      setReports(MOCK_REPORTS);
+      setError(null);
     } finally {
       setLoadingReports(false);
     }
@@ -218,18 +251,23 @@ export function CityMapPanel() {
 
         {/* Scrollable List Area */}
         <div className="max-h-[260px] space-y-2.5 overflow-y-auto pr-2 custom-scrollbar">
-          {filteredReports.slice(0, 10).map((report) => (
+          {filteredReports.slice(0, 10).map((report, index) => (
             <button
               key={report.id}
               onClick={() => { setFocusLocation(report.location); setFocusRequestKey((p) => p + 1); setViewMode("map"); }}
               className="group relative flex w-full items-center justify-between rounded-2xl border border-white/40 bg-white/40 p-4 text-left shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-200 hover:bg-white/80 hover:shadow-md"
             >
-              <div className="min-w-0 pr-4">
+              <div className="flex min-w-0 items-start gap-3 pr-4">
+                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-cyan-100 bg-cyan-50 px-1.5 text-[10px] font-extrabold tracking-wide text-cyan-700">
+                  {index + 1}
+                </span>
+                <div className="min-w-0">
                 <p className="truncate text-sm font-bold text-slate-800 transition-colors group-hover:text-cyan-600">{report.title}</p>
                 <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                   {report.area || "Sector Unknown"}
                 </p>
+                </div>
               </div>
               <span className={`shrink-0 rounded-xl px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-widest shadow-sm border ${
                 report.category === 'danger' ? 'bg-red-50 text-red-600 border-red-100' :
@@ -286,15 +324,22 @@ export function CityMapPanel() {
       {/* Floating Action Button (FAB) - Integrated closer */}
       <div className="relative h-12 w-12 shrink-0">
         <button
-          onClick={() => { resetForm(); setIsCreateModalOpen(true); }}
+          onClick={openCreateModalWithGPS}
+          disabled={gpsLoading}
           aria-label="Create new report"
-          className="group absolute inset-0 flex items-center justify-center rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-white shadow-[0_8px_16px_-4px_rgba(6,182,212,0.5)] transition-all duration-300 hover:scale-110 hover:shadow-[0_12px_20px_-4px_rgba(6,182,212,0.6)] active:scale-90"
+          className="group absolute inset-0 flex items-center justify-center rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-white shadow-[0_8px_16px_-4px_rgba(6,182,212,0.5)] transition-all duration-300 hover:scale-110 hover:shadow-[0_12px_20px_-4px_rgba(6,182,212,0.6)] active:scale-90 disabled:opacity-70 disabled:cursor-wait"
         >
           <div className="absolute inset-0 rounded-full border-[2.5px] border-white/80" />
-          <svg className="h-5 w-5 transition-transform duration-500 group-hover:rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
+          {gpsLoading ? (
+            <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2a10 10 0 0 1 10 10" />
+            </svg>
+          ) : (
+            <svg className="h-5 w-5 transition-transform duration-500 group-hover:rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          )}
         </button>
       </div>
 
@@ -353,7 +398,37 @@ export function CityMapPanel() {
                 <input className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-cyan-500 focus:bg-white focus:ring-4 focus:ring-cyan-500/10" placeholder="Sector / Area" value={form.area} onChange={(e) => setForm({ ...form, area: e.target.value })} required />
               </div>
 
-              <input className="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-mono text-slate-500 outline-none" placeholder="Target Coordinates" value={form.location} readOnly />
+              <div className="relative">
+                <input
+                  className="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 pr-10 text-sm font-mono text-slate-500 outline-none"
+                  placeholder="Target Coordinates (tap map or use GPS)"
+                  value={form.location}
+                  readOnly
+                />
+                <button
+                  type="button"
+                  title="Use my current GPS location"
+                  onClick={() => {
+                    if (!navigator.geolocation) return;
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => {
+                        const { latitude, longitude } = pos.coords;
+                        setForm((prev) => ({ ...prev, location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` }));
+                        setCreateError(null);
+                      },
+                      () => setCreateError("GPS access denied. Please tap on the map to set location."),
+                      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+                    );
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-500 hover:text-cyan-700 transition-colors"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+                    <circle cx="12" cy="12" r="8" strokeDasharray="2 2" />
+                  </svg>
+                </button>
+              </div>
 
               <div className="grid grid-cols-3 gap-3 pt-2">
                 {Array.from({ length: 3 }).map((_, idx) => {

@@ -63,7 +63,7 @@ function MapFocusController({ target, requestKey }: { target: [number, number] |
       // Very fast, buttery pan for nearby items
       map.panTo(targetLatLng, {
         animate: true,
-        duration: 0.4, 
+        duration: 0.4,
         easeLinearity: 0.1,
       });
     } else {
@@ -72,7 +72,7 @@ function MapFocusController({ target, requestKey }: { target: [number, number] |
       map.flyTo(targetLatLng, zoomTarget, {
         animate: true,
         duration: flyDuration,
-        easeLinearity: 0.1, 
+        easeLinearity: 0.1,
       });
     }
   }, [map, requestKey, target]);
@@ -150,7 +150,7 @@ export default function CityMapView({
   useEffect(() => {
     try {
       delete (L.Icon.Default.prototype as L.Icon.Default & { _getIconUrl?: unknown })._getIconUrl;
-    } catch {}
+    } catch { }
 
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -244,13 +244,13 @@ export default function CityMapView({
           zoomControl={false}
           className="h-full w-full outline-none"
         >
-          <MapClickPicker 
-            onPick={onLocationPick} 
-            onMapClick={(lat, lng) => setSelectedPosition([lat, lng])} 
+          <MapClickPicker
+            onPick={onLocationPick}
+            onMapClick={(lat, lng) => setSelectedPosition([lat, lng])}
           />
           <MapFocusController target={focusLocation ? parseLocation(focusLocation) : null} requestKey={focusRequestKey} />
           <ZoomControl position="bottomleft" />
-          
+
           <TileLayer
             attribution='&copy; Google'
             url="https://{s}.google.com/vt/lyrs=m&hl=bn&x={x}&y={y}&z={z}"
@@ -282,10 +282,10 @@ export default function CityMapView({
                 <Popup closeButton={false} minWidth={280} maxWidth={320}>
                   <div className="-m-3 relative overflow-hidden rounded-2xl bg-white/95 p-5 shadow-2xl backdrop-blur-xl ring-1 ring-slate-900/10 animate-in fade-in zoom-in-95 duration-200">
                     <PopupCloseButton />
-                    
+
                     <h4 className="mb-1 pr-6 text-[1.1rem] font-extrabold leading-tight tracking-tight text-slate-900">{report.title}</h4>
                     <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-slate-500">{report.description}</p>
-                    
+
                     {hasImage && (
                       <div className="relative mb-4 overflow-hidden rounded-xl bg-slate-100 shadow-inner">
                         <img
@@ -306,12 +306,11 @@ export default function CityMapView({
                       <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">ক্যাটাগরি</div>
                       <div>
                         <span
-                          className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-bold capitalize shadow-sm ring-1 ring-inset ${
-                            report.category === "danger" ? "bg-red-50 text-red-700 ring-red-600/20"
-                            : report.category === "help" ? "bg-blue-50 text-blue-700 ring-blue-600/20"
-                            : report.category === "warning" ? "bg-amber-50 text-amber-700 ring-amber-600/20"
-                            : "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
-                          }`}
+                          className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-bold capitalize shadow-sm ring-1 ring-inset ${report.category === "danger" ? "bg-red-50 text-red-700 ring-red-600/20"
+                              : report.category === "help" ? "bg-blue-50 text-blue-700 ring-blue-600/20"
+                                : report.category === "warning" ? "bg-amber-50 text-amber-700 ring-amber-600/20"
+                                  : "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
+                            }`}
                         >
                           {report.category}
                         </span>
@@ -364,7 +363,8 @@ export default function CityMapView({
       />
 
       {/* Global CSS for Hardware Accelerated Smooth Animations & Map Tweaks */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .cityzen-report-marker {
           will-change: transform;
           position: relative;
