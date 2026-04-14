@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { getMyProfile, refreshAccessToken } from "@/lib/api/auth";
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token-store";
 import { ApiError } from "@/lib/api/types";
@@ -15,6 +15,7 @@ type NavbarUser = {
 
 export function CityNavbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const navRef = useRef<HTMLElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -101,7 +102,7 @@ export function CityNavbar() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [pathname]);
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -125,7 +126,7 @@ export function CityNavbar() {
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
-  }, [router]);
+  }, [pathname]);
 
   function handleLogout() {
     clearTokens();
