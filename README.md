@@ -19,9 +19,11 @@ python manage.py runserver 0.0.0.0:8000
     - [x] User profile view
     - [x] User profile update
     - [x] Password change
-    - [ ] Chat Model
-    - [ ] Map model
-    - [ ] Comment model
-    - [ ] Report model
-    - [ ] Community model
+    - [x] Chat Model
+    - [x] Map model
+    - [x] Comment model
+    - [x] Report model
+    - [x] Community model
+    - [ ] Ai Agent model
+    - [ ] Notification model
 - [ ] Frontend Feature Checklist
