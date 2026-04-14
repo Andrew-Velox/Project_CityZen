@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { refreshAccessToken } from "@/lib/api/auth";
@@ -21,6 +21,7 @@ const CityMapView = dynamic(() => import("@/components/home/city-map-view"), {
 export function CityMapPanel() {
   const [reports, setReports] = useState<Report[]>([]);
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
+  const listPanelRef = useRef<HTMLDivElement | null>(null);
   
   // States
   const [loadingReports, setLoadingReports] = useState(true);
@@ -153,7 +154,14 @@ export function CityMapPanel() {
   const renderListPanel = () => {
     if (viewMode !== "list") return null;
     return (
-      <div className="absolute bottom-28 left-1/2 z-[642] mx-auto w-11/12 max-w-lg -translate-x-1/2 rounded-[2rem] border border-white/60 bg-white/70 p-6 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.1)] backdrop-blur-2xl transition-all animate-in slide-in-from-bottom-4 fade-in duration-300">
+      <>
+      <button
+        type="button"
+        aria-label="Close reports panel"
+        onClick={() => setViewMode("map")}
+        className="absolute inset-0 z-[641] bg-transparent"
+      />
+      <div ref={listPanelRef} className="absolute bottom-28 left-1/2 z-[642] mx-auto w-11/12 max-w-lg -translate-x-1/2 rounded-[2rem] border border-white/60 bg-white/70 p-6 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.1)] backdrop-blur-2xl transition-all animate-in slide-in-from-bottom-4 fade-in duration-300">
         
         {/* Header with Close Button */}
         <div className="mb-5 flex items-center justify-between">
@@ -244,6 +252,7 @@ export function CityMapPanel() {
           )}
         </div>
       </div>
+      </>
     );
   };
 
@@ -380,7 +389,15 @@ export function CityMapPanel() {
   };
 
   return (
-    <section className="relative h-[100dvh] w-full overflow-hidden bg-slate-50 font-sans">
+    <section
+      className="relative h-[100dvh] w-full overflow-hidden bg-slate-50 font-sans"
+      onPointerDownCapture={(event) => {
+        if (viewMode !== "list") return;
+        const target = event.target as Node;
+        if (listPanelRef.current?.contains(target)) return;
+        setViewMode("map");
+      }}
+    >
       <CityMapView
         reports={filteredReports}
         onLocationPick={(lat, lng) => {
