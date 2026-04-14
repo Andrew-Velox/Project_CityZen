@@ -16,6 +16,7 @@ type NavbarUser = {
 export function CityNavbar() {
   const router = useRouter();
   const pathname = usePathname();
+  const isHomeRoute = pathname === "/";
   const navRef = useRef<HTMLElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -138,7 +139,14 @@ export function CityNavbar() {
   }
 
   return (
-    <header className="sticky top-0 z-[2200] mx-auto w-full shrink-0 bg-transparent transition-all" ref={navRef}>
+    <header
+      className={`${
+        isHomeRoute
+          ? "absolute inset-x-0 top-0 z-[2800] w-full bg-transparent"
+          : "sticky top-0 z-[2200] mx-auto w-full shrink-0 bg-transparent"
+      } transition-all`}
+      ref={navRef}
+    >
       <nav
         className="relative z-[2201] mx-4 mt-4 flex items-center justify-between gap-3 rounded-3xl border border-[#c5d7ea99] bg-[#e9f5ff3b] px-4 py-3 shadow-[0_10px_26px_#1528481a] backdrop-blur-[14px]"
         aria-label="Main navigation"
