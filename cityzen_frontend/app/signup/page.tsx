@@ -1,14 +1,17 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { signup } from "@/lib/api/auth";
+import { FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { login, signup } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/types";
+import { setTokens } from "@/lib/auth/token-store";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { AuthFeedback } from "@/components/auth/auth-feedback";
 import { useLanguage } from "@/components/providers/language-provider";
 
 export default function SignupPage() {
   const { t } = useLanguage();
+  const router = useRouter();
   const [form, setForm] = useState({
     username: "",
     first_name: "",
@@ -21,6 +24,43 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [returnPath, setReturnPath] = useState<string>("/profile");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const sanitizeInternalPath = (value: string | null | undefined) => {
+      if (!value) return null;
+      try {
+        const decoded = decodeURIComponent(value);
+        if (decoded.startsWith("/") && !decoded.startsWith("//")) {
+          return decoded;
+        }
+      } catch {
+        return null;
+      }
+      return null;
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const nextFromQuery = sanitizeInternalPath(params.get("next"));
+
+    if (nextFromQuery) {
+      setReturnPath(nextFromQuery);
+      return;
+    }
+
+    try {
+      if (!document.referrer) return;
+      const ref = new URL(document.referrer);
+      if (ref.origin !== window.location.origin) return;
+      const candidate = `${ref.pathname}${ref.search}${ref.hash}`;
+      if (candidate.startsWith("/login") || candidate.startsWith("/signup")) return;
+      setReturnPath(candidate || "/profile");
+    } catch {
+      setReturnPath("/profile");
+    }
+  }, []);
 
   const labelClass = "mb-1.5 block text-sm font-semibold text-[#1a2437]";
   const inputClass =
@@ -35,16 +75,10 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      const response = await signup(form);
-      setSuccess(response.message || t("রেজিস্ট্রেশন সম্পন্ন। অনুগ্রহ করে ইমেইল চেক করুন।", "Registration complete. Please check your email."));
-      setForm({
-        username: "",
-        first_name: "",
-        last_name: "",
-        email: "",
-        password: "",
-        confirm_password: "",
-      });
+      await signup(form);
+      const auth = await login({ username: form.username, password: form.password });
+      setTokens(auth.access, auth.refresh);
+      router.replace(returnPath);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message || t("রেজিস্ট্রেশন ব্যর্থ হয়েছে।", "Registration failed."));
@@ -66,7 +100,7 @@ export default function SignupPage() {
       subtitle={t("CityZen-এ যোগ দিন এবং আপনার শহরের তথ্য ব্যবস্থাপনা শুরু করুন।", "Join CityZen and start managing your urban insights.")}
       footerText={t("ইতিমধ্যে রেজিস্টার করেছেন?", "Already registered?")}
       footerCtaLabel={t("লগইন", "Sign in")}
-      footerHref="/login"
+      footerHref={`/login?next=${encodeURIComponent(returnPath)}`}
     >
       <form className="grid gap-4" onSubmit={onSubmit}>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -153,7 +187,7 @@ export default function SignupPage() {
         {success ? <AuthFeedback type="success" message={success} /> : null}
 
         <button type="submit" disabled={isLoading} className={buttonClass}>
-          {isLoading ? t("অ্যাকাউন্ট তৈরি হচ্ছে...", "Creating account...") : t("অ্যাকাউন্ট তৈরি করুন", "Create account")}
+          {isLoading ? t("অ্যাকাউন্ট তৈরি করে লগইন করা হচ্ছে...", "Creating account and signing in...") : t("অ্যাকাউন্ট তৈরি করুন", "Create account")}
         </button>
       </form>
     </AuthShell>

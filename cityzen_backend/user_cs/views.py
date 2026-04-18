@@ -19,8 +19,31 @@ from drf_spectacular.utils import extend_schema,OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from django.utils import timezone
 from rest_framework.decorators import action
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 User = get_user_model()
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        username_key = self.username_field
+        username_value = attrs.get(username_key)
+        password = attrs.get("password")
+
+        # Transitional behavior: if legacy users were left inactive by old
+        # registration flow, reactivate them on first valid login attempt.
+        if username_value and password:
+            user = User.objects.filter(**{username_key: username_value}).first()
+            if user and not user.is_active and user.check_password(password):
+                user.is_active = True
+                user.save(update_fields=["is_active"])
+
+        return super().validate(attrs)
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -37,13 +60,12 @@ class RegistrationViewSet(mixins.CreateModelMixin,viewsets.GenericViewSet):
     @extend_schema(
         summary="Register a new user",
         description="""
-        Register a new user account with email verification.
+        Register a new user account.
         
         **Process:**
         1. User submits registration data
-        2. Account is created with `is_active=False`
-        3. Verification email is sent to the provided email address
-        4. User must click the activation link to activate their account
+        2. Account is created as active (`is_active=True`)
+        3. User can log in immediately
         
         **Required Fields:**
         - username: Unique username (3-150 characters)
@@ -54,7 +76,7 @@ class RegistrationViewSet(mixins.CreateModelMixin,viewsets.GenericViewSet):
         - confirm_password: Must match password
         
         **Response:**
-        - Success: Message to check email for confirmation
+        - Success: Account created successfully
         - Error: Validation errors with field-specific messages
         
         **Examples:**
@@ -90,23 +112,12 @@ class RegistrationViewSet(mixins.CreateModelMixin,viewsets.GenericViewSet):
         if serializer.is_valid():
             user = serializer.save()
 
-            token = default_token_generator.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            # Hard guarantee while verification is disabled.
+            if not user.is_active:
+                user.is_active = True
+                user.save(update_fields=["is_active"])
 
-            confirm_link = f"https://my-django-template.onrender.com/user/account/active/{uid}/{token}"
-
-            email_subject = "Confirm Your Email"
-            email_body = render_to_string('confirm_account_email.html',{'confirm_link':confirm_link})
-
-            email = EmailMultiAlternatives(email_subject,"",from_email=settings.EMAIL_HOST_USER,to=[user.email])
-            email.attach_alternative(email_body,"text/html")
-            try:
-                email.send()
-                print(f"Email sent successfully to {user.email}")
-                return Response({"message": "Check Your Mail for Confirmation"}, status=status.HTTP_201_CREATED)
-            except Exception as e:
-                print(f"Email Error: {str(e)}")
-                return Response({"message": "User created but email failed to send", "error": str(e)}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Account created successfully. You can now log in."}, status=status.HTTP_201_CREATED)
         
         # Log validation errors for debugging
         print(f"Registration validation errors: {serializer.errors}")

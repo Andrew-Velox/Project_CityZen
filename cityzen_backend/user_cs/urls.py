@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 from .views import *
 
 
@@ -14,7 +14,7 @@ router.register(r'account', ProfileDeleteViewSet, basename='account')  # will be
 urlpatterns = [
     path('', include(router.urls)),
     path('register/', RegistrationViewSet.as_view({'post': 'create'}), name='user-register'),
-    path('login/', TokenObtainPairView.as_view(), name='login'),
+    path('login/', CustomTokenObtainPairView.as_view(), name='login'),
     path('refresh-token/', TokenRefreshView.as_view(), name='token_refresh'),
     path('profile/', ProfileViewSet.as_view({'get': 'list'}), name='user-profile'),
     path('profile/update/<int:pk>/', UserUpdateViewSet.as_view({ 'patch': 'partial_update'}), name='user-profile-update'),

@@ -33,6 +33,12 @@ ALLOWED_HOSTS = env_list(
     ["127.0.0.1", "localhost", "project-cityzen.onrender.com"],
 )
 
+# Always keep local hosts available for dev/test, even when ALLOWED_HOSTS
+# is supplied via environment variables.
+for host in ("127.0.0.1", "localhost"):
+    if host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(host)
+
 CSRF_TRUSTED_ORIGINS = env_list(
     "CSRF_TRUSTED_ORIGINS",
     [

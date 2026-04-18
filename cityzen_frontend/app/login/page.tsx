@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/types";
@@ -16,6 +16,43 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [returnPath, setReturnPath] = useState<string>("/profile");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const sanitizeInternalPath = (value: string | null | undefined) => {
+      if (!value) return null;
+      try {
+        const decoded = decodeURIComponent(value);
+        if (decoded.startsWith("/") && !decoded.startsWith("//")) {
+          return decoded;
+        }
+      } catch {
+        return null;
+      }
+      return null;
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const nextFromQuery = sanitizeInternalPath(params.get("next"));
+
+    if (nextFromQuery) {
+      setReturnPath(nextFromQuery);
+      return;
+    }
+
+    try {
+      if (!document.referrer) return;
+      const ref = new URL(document.referrer);
+      if (ref.origin !== window.location.origin) return;
+      const candidate = `${ref.pathname}${ref.search}${ref.hash}`;
+      if (candidate.startsWith("/login") || candidate.startsWith("/signup")) return;
+      setReturnPath(candidate || "/profile");
+    } catch {
+      setReturnPath("/profile");
+    }
+  }, []);
 
   const labelClass = "mb-1.5 block text-sm font-semibold text-[#1a2437]";
   const inputClass =
@@ -31,7 +68,7 @@ export default function LoginPage() {
     try {
       const response = await login({ username, password });
       setTokens(response.access, response.refresh);
-      router.push("/profile");
+      router.replace(returnPath);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message || t("লগইন ব্যর্থ হয়েছে। তথ্য যাচাই করুন।", "Login failed. Check your credentials."));
@@ -49,7 +86,7 @@ export default function LoginPage() {
       subtitle={t("CityZen ওয়ার্কস্পেসে যেতে লগইন করুন।", "Log in to continue to your CityZen workspace.")}
       footerText={t("এখনও অ্যাকাউন্ট নেই?", "No account yet?")}
       footerCtaLabel={t("একটি তৈরি করুন", "Create one")}
-      footerHref="/signup"
+      footerHref={`/signup?next=${encodeURIComponent(returnPath)}`}
     >
       <form className="grid gap-4" onSubmit={onSubmit}>
         <label htmlFor="username" className={labelClass}>{t("ইউজারনেম", "Username")}</label>
