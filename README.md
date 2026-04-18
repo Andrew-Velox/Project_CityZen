@@ -6,7 +6,7 @@
 cd cityzen_backend
 python -m venv .venv
 source .venv/Scripts/activate
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 python -m daphne -b 127.0.0.1 -p 8000 askrag.asgi:application 
 # python manage.py runserver
 python manage.py runserver 0.0.0.0:8000
