@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
 import { refreshAccessToken } from "@/lib/api/auth";
 import { createReport, deleteReport, getReports, updateReport } from "@/lib/api/report";
 import { getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token-store";
@@ -22,10 +21,10 @@ const CityMapView = dynamic(() => import("@/components/home/city-map-view"), {
 const MOCK_REPORTS: Report[] = [];
 
 export function CityMapPanel() {
-  const searchParams = useSearchParams();
   const [reports, setReports] = useState<Report[]>([]);
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
   const listPanelRef = useRef<HTMLDivElement | null>(null);
+  const [areaSearchQuery, setAreaSearchQuery] = useState("");
   
   // States
   const [loadingReports, setLoadingReports] = useState(true);
@@ -113,6 +112,23 @@ export function CityMapPanel() {
 
   useEffect(() => { loadReports(); }, []);
 
+  useEffect(() => {
+    const syncAreaSearchFromUrl = () => {
+      if (typeof window === "undefined") return;
+      const value = new URLSearchParams(window.location.search).get("areaSearch") || "";
+      setAreaSearchQuery(value);
+    };
+
+    syncAreaSearchFromUrl();
+    window.addEventListener("popstate", syncAreaSearchFromUrl);
+    window.addEventListener("cityzen:area-search-change", syncAreaSearchFromUrl as EventListener);
+
+    return () => {
+      window.removeEventListener("popstate", syncAreaSearchFromUrl);
+      window.removeEventListener("cityzen:area-search-change", syncAreaSearchFromUrl as EventListener);
+    };
+  }, []);
+
   // --- Derived Data ---
 
   const availableAreas = useMemo(() => 
@@ -123,7 +139,7 @@ export function CityMapPanel() {
     const now = Date.now();
     const ages = { "7d": 7, "30d": 30, "90d": 90, "all": null };
     const maxAgeMs = ages[dateRangeFilter] ? ages[dateRangeFilter]! * 86400000 : null;
-    const normalizedAreaSearch = (searchParams.get("areaSearch") || "").trim().toLowerCase();
+    const normalizedAreaSearch = areaSearchQuery.trim().toLowerCase();
 
     return reports.filter((report) => {
       if (categoryFilter !== "all" && report.category !== categoryFilter) return false;
@@ -135,7 +151,7 @@ export function CityMapPanel() {
       }
       return true;
     });
-  }, [reports, dateRangeFilter, categoryFilter, areaFilter, searchParams]);
+  }, [reports, dateRangeFilter, categoryFilter, areaFilter, areaSearchQuery]);
 
   // --- Handlers ---
 

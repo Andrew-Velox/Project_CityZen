@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { getMyProfile, refreshAccessToken } from "@/lib/api/auth";
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token-store";
 import { ApiError } from "@/lib/api/types";
@@ -16,7 +16,6 @@ type NavbarUser = {
 export function CityNavbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const isHomeRoute = pathname === "/";
   const navRef = useRef<HTMLElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -29,9 +28,13 @@ export function CityNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAreaSearchOpen, setIsAreaSearchOpen] = useState(false);
+  const [activeAreaSearch, setActiveAreaSearch] = useState("");
   const [areaSearchInput, setAreaSearchInput] = useState("");
 
-  const activeAreaSearch = searchParams.get("areaSearch") || "";
+  function readAreaSearchFromUrl() {
+    if (typeof window === "undefined") return "";
+    return new URLSearchParams(window.location.search).get("areaSearch") || "";
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -141,6 +144,21 @@ export function CityNavbar() {
   }, [pathname]);
 
   useEffect(() => {
+    const syncAreaSearchFromUrl = () => {
+      setActiveAreaSearch(readAreaSearchFromUrl());
+    };
+
+    syncAreaSearchFromUrl();
+    window.addEventListener("popstate", syncAreaSearchFromUrl);
+    window.addEventListener("cityzen:area-search-change", syncAreaSearchFromUrl as EventListener);
+
+    return () => {
+      window.removeEventListener("popstate", syncAreaSearchFromUrl);
+      window.removeEventListener("cityzen:area-search-change", syncAreaSearchFromUrl as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
     setAreaSearchInput(activeAreaSearch);
   }, [activeAreaSearch]);
 
@@ -154,7 +172,7 @@ export function CityNavbar() {
     if (!isHomeRoute) return;
 
     const trimmedValue = nextValue.trim();
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
 
     if (trimmedValue) {
       params.set("areaSearch", trimmedValue);
@@ -164,6 +182,10 @@ export function CityNavbar() {
 
     const query = params.toString();
     router.replace(query ? `/?${query}` : "/", { scroll: false });
+    setActiveAreaSearch(trimmedValue);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("cityzen:area-search-change"));
+    }
   }
 
   function handleLogout() {
