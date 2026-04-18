@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { getMyProfile, refreshAccessToken } from "@/lib/api/auth";
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token-store";
 import { ApiError } from "@/lib/api/types";
+import { useLanguage } from "@/components/i18n/language-context";
 
 type NavbarUser = {
   firstName: string;
@@ -19,12 +20,42 @@ export function CityNavbar() {
   const isHomeRoute = pathname === "/";
   const navRef = useRef<HTMLElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const { language } = useLanguage();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<NavbarUser | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const text =
+    language === "bn"
+      ? {
+          home: "হোম",
+          community: "কমিউনিটি",
+          about: "পরিচিতি",
+          faq: "জিজ্ঞাসা",
+          login: "লগইন",
+          signup: "সাইন আপ",
+          welcome: "স্বাগতম",
+          userFallback: "ব্যবহারকারী",
+          profile: "প্রোফাইল",
+          logout: "লগআউট",
+          toggleMobileMenu: "মোবাইল মেনু টগল করুন",
+        }
+      : {
+          home: "Home",
+          community: "Community",
+          about: "About",
+          faq: "FAQ",
+          login: "Login",
+          signup: "Sign up",
+          welcome: "Welcome",
+          userFallback: "User",
+          profile: "Profile",
+          logout: "Logout",
+          toggleMobileMenu: "Toggle mobile menu",
+        };
 
   useEffect(() => {
     let mounted = true;
@@ -142,13 +173,13 @@ export function CityNavbar() {
     <header
       className={`${
         isHomeRoute
-          ? "absolute inset-x-0 top-0 z-[2800] w-full bg-transparent"
-          : "sticky top-0 z-[2200] w-full shrink-0 bg-transparent"
+          ? "absolute inset-x-0 top-0 z-[2800] w-full bg-transparent pointer-events-none"
+          : "sticky top-0 z-[2200] w-full shrink-0 bg-transparent pointer-events-none"
       } transition-all`}
       ref={navRef}
     >
       <nav
-        className="relative z-[2201] mx-auto mt-4 flex w-[calc(100%-1.5rem)] max-w-6xl items-center justify-between gap-3 rounded-3xl border border-[#c5d7ea99] bg-[#e9f5ff3b] px-4 py-3 shadow-[0_10px_26px_#1528481a] backdrop-blur-[14px] sm:w-[calc(100%-2rem)]"
+        className="relative z-[2201] mx-auto mt-4 flex w-[calc(100%-1.5rem)] max-w-6xl items-center justify-between gap-3 rounded-3xl border border-[#c5d7ea99] bg-[#e9f5ff3b] px-4 py-3 shadow-[0_10px_26px_#1528481a] backdrop-blur-[14px] pointer-events-auto sm:w-[calc(100%-2rem)]"
         aria-label="Main navigation"
       >
         {/* Logo */}
@@ -167,16 +198,18 @@ export function CityNavbar() {
         {/* Desktop Middle Links */}
         <div className="hidden md:flex items-center gap-6">
           <Link href="/" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
-            হোম
+            {text.home}
           </Link>
-          <Link href="/community" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
-            কমিউনিটি
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/community" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
+              {text.community}
+            </Link>
+          ) : null}
           <Link href="/about" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
-            পরিচিতি
+            {text.about}
           </Link>
           <Link href="/faq" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
-            জিজ্ঞাসা
+            {text.faq}
           </Link>
         </div>
 
@@ -190,19 +223,19 @@ export function CityNavbar() {
                 href="/login"
                 className="rounded-xl px-3 py-2 font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:bg-[#edf2fb] hover:text-[#233e7f]"
               >
-                লগইন
+                {text.login}
               </Link>
               <Link
                 href="/signup"
-                className="rounded-xl bg-gradient-to-br from-[#1f4fd7] to-[#173ea8] px-3 py-2 font-semibold text-[#ffffff] transition hover:-translate-y-[1px] hover:shadow-[0_10px_20px_#12295a36]"
+                className="rounded-xl border border-[#9fcfe8] bg-[#B9E5FE] px-3 py-2 font-semibold text-[#0e3550] transition hover:-translate-y-[1px] hover:bg-[#a8defc] hover:shadow-[0_10px_20px_#6fa8c83b]"
               >
-                সাইন আপ
+                {text.signup}
               </Link>
             </div>
           ) : (
             <div className="relative z-[2202] flex items-center justify-end gap-3" ref={dropdownRef}>
               <p className="hidden text-[0.94rem] font-semibold text-[#243147] sm:block">
-                স্বাগতম, {user?.firstName || "ব্যবহারকারী"}
+                {text.welcome}, {user?.firstName || text.userFallback}
               </p>
 
               <button
@@ -240,7 +273,7 @@ export function CityNavbar() {
                     className="block w-full px-4 py-3 text-left font-semibold text-[#1f2937] transition hover:bg-[#edf2fb] hover:text-[#1f3f85]"
                     onClick={() => setIsDropdownOpen(false)}
                   >
-                    প্রোফাইল
+                    {text.profile}
                   </Link>
                   <button
                     type="button"
@@ -248,7 +281,7 @@ export function CityNavbar() {
                     className="block w-full px-4 py-3 text-left font-semibold text-[#ef4444] transition hover:bg-[#fef2f2] hover:text-[#b91c1c]"
                     onClick={handleLogout}
                   >
-                    লগআউট
+                    {text.logout}
                   </button>
                 </div>
               ) : null}
@@ -260,7 +293,7 @@ export function CityNavbar() {
             type="button"
             className="inline-flex items-center justify-center rounded-xl p-2 text-[#334155] transition hover:bg-[#edf2fb] md:hidden"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle mobile menu"
+            aria-label={text.toggleMobileMenu}
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {isMobileMenuOpen ? (
@@ -281,28 +314,30 @@ export function CityNavbar() {
                 className="rounded-xl px-4 py-3 text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb] hover:text-[#1f4fd7]"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                হোম
+                {text.home}
               </Link>
-              <Link
-                href="/community"
-                className="rounded-xl px-4 py-3 text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb] hover:text-[#1f4fd7]"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                কমিউনিটি
-              </Link>
+              {isLoggedIn ? (
+                <Link
+                  href="/community"
+                  className="rounded-xl px-4 py-3 text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb] hover:text-[#1f4fd7]"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {text.community}
+                </Link>
+              ) : null}
               <Link
                 href="/about"
                 className="rounded-xl px-4 py-3 text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb] hover:text-[#1f4fd7]"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                পরিচিতি
+                {text.about}
               </Link>
               <Link
                 href="/faq"
                 className="rounded-xl px-4 py-3 text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb] hover:text-[#1f4fd7]"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                জিজ্ঞাসা
+                {text.faq}
               </Link>
 
               {/* Show auth links in mobile menu if not logged in */}
@@ -313,14 +348,14 @@ export function CityNavbar() {
                     className="rounded-xl px-4 py-3 text-center text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb]"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    লগইন
+                    {text.login}
                   </Link>
                   <Link
                     href="/signup"
-                    className="rounded-xl bg-gradient-to-br from-[#1f4fd7] to-[#173ea8] px-4 py-3 text-center text-[0.95rem] font-semibold text-[#ffffff] shadow-md"
+                    className="rounded-xl border border-[#9fcfe8] bg-[#B9E5FE] px-4 py-3 text-center text-[0.95rem] font-semibold text-[#0e3550] shadow-md"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    সাইন আপ
+                    {text.signup}
                   </Link>
                 </div>
               )}

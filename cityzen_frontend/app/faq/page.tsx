@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { getFaqs } from "@/lib/api/faq";
 import type { FaqItem } from "@/lib/api/types";
+import { useLanguage } from "@/components/i18n/language-context";
 
-const categoryLabelMap: Record<FaqItem["category"], string> = {
+const categoryLabelMapBn: Record<FaqItem["category"], string> = {
   general: "সাধারণ",
   account: "অ্যাকাউন্ট",
   reporting: "রিপোর্টিং",
@@ -13,13 +14,22 @@ const categoryLabelMap: Record<FaqItem["category"], string> = {
   technical: "টেকনিক্যাল",
 };
 
+const categoryLabelMapEn: Record<FaqItem["category"], string> = {
+  general: "General",
+  account: "Account",
+  reporting: "Reporting",
+  community: "Community",
+  technical: "Technical",
+};
+
 type FaqItemViewProps = {
   item: FaqItem;
   isOpen: boolean;
   onToggle: () => void;
+  categoryLabelMap: Record<FaqItem["category"], string>;
 };
 
-function FaqItemView({ item, isOpen, onToggle }: FaqItemViewProps) {
+function FaqItemView({ item, isOpen, onToggle, categoryLabelMap }: FaqItemViewProps) {
   return (
     <article className="overflow-hidden rounded-2xl border border-[#d6e2f5] bg-white/95 shadow-[0_12px_35px_#193b6b12]">
       <button
@@ -52,11 +62,47 @@ function FaqItemView({ item, isOpen, onToggle }: FaqItemViewProps) {
 }
 
 export default function FaqPage() {
+  const { language } = useLanguage();
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openId, setOpenId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<"all" | FaqItem["category"]>("all");
+
+  const text =
+    language === "bn"
+      ? {
+          loadError: "FAQ লোড করা যায়নি।",
+          loadingTitle: "সাধারণ জিজ্ঞাসা লোড হচ্ছে...",
+          title: "সাধারণ জিজ্ঞাসা (FAQ)",
+          helpCenter: "সহায়তা কেন্দ্র",
+          description: "CityZen ব্যবহার, রিপোর্ট করা, প্রোফাইল এবং কমিউনিটি বিষয়ে দ্রুত উত্তর পেতে নিচের প্রশ্নগুলো দেখুন।",
+          all: "সব",
+          fetching: "FAQ তথ্য আনা হচ্ছে...",
+          empty: "এই ক্যাটাগরিতে এখনো কোনো FAQ যোগ করা হয়নি।",
+          needMoreHelp: "আরও সাহায্য দরকার?",
+          needMoreHelpDescription:
+            "আপনার প্রশ্নের উত্তর না পেলে রিপোর্ট ফিচার ব্যবহার করুন বা প্রোফাইল পেজ থেকে যোগাযোগের তথ্য আপডেট করে রাখুন।",
+          mapCta: "ম্যাপে যান",
+          aboutCta: "About পেজে ফিরে যান",
+        }
+      : {
+          loadError: "Failed to load FAQs.",
+          loadingTitle: "Loading FAQs...",
+          title: "Frequently Asked Questions (FAQ)",
+          helpCenter: "Help Center",
+          description: "Find quick answers about using CityZen, reporting issues, profile settings, and community features.",
+          all: "All",
+          fetching: "Fetching FAQ data...",
+          empty: "No FAQs are available in this category yet.",
+          needMoreHelp: "Need more help?",
+          needMoreHelpDescription:
+            "If your question is not answered here, use the report feature or keep your contact details updated from your profile page.",
+          mapCta: "Go to Map",
+          aboutCta: "Back to About",
+        };
+
+  const categoryLabelMap = language === "bn" ? categoryLabelMapBn : categoryLabelMapEn;
 
   useEffect(() => {
     let mounted = true;
@@ -72,7 +118,7 @@ export default function FaqPage() {
         setOpenId(data[0]?.id ?? null);
       } catch (err) {
         if (!mounted) return;
-        setError(err instanceof Error ? err.message : "FAQ লোড করা যায়নি।");
+        setError(err instanceof Error ? err.message : text.loadError);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -87,9 +133,9 @@ export default function FaqPage() {
   }, []);
 
   const title = useMemo(() => {
-    if (loading) return "সাধারণ জিজ্ঞাসা লোড হচ্ছে...";
-    return "সাধারণ জিজ্ঞাসা (FAQ)";
-  }, [loading]);
+    if (loading) return text.loadingTitle;
+    return text.title;
+  }, [loading, text.loadingTitle, text.title]);
 
   const categoryTabs = useMemo(() => {
     const categories = Array.from(new Set(faqs.map((item) => item.category)));
@@ -110,13 +156,13 @@ export default function FaqPage() {
       <section className="relative mx-auto w-full max-w-5xl pt-6 md:pt-9">
         <article className="rounded-[28px] border border-[#d7e0f0] bg-gradient-to-b from-[#ffffffef] to-[#f8fbffef] p-6 shadow-[0_24px_60px_#0f2b551c] backdrop-blur-[8px] md:p-9">
           <p className="inline-flex rounded-full border border-[#cfdbef] bg-[#f8fbff] px-3 py-1 text-[0.76rem] font-semibold uppercase tracking-[0.08em] text-[#3d5c86]">
-            সহায়তা কেন্দ্র
+            {text.helpCenter}
           </p>
           <h1 className="mt-4 text-[clamp(1.75rem,3.8vw,2.6rem)] font-extrabold leading-[1.1] text-[#0f172a]">
             {title}
           </h1>
           <p className="mt-3 max-w-2xl text-[1rem] leading-relaxed text-[#334155] md:text-[1.06rem]">
-            CityZen ব্যবহার, রিপোর্ট করা, প্রোফাইল এবং কমিউনিটি বিষয়ে দ্রুত উত্তর পেতে নিচের প্রশ্নগুলো দেখুন।
+            {text.description}
           </p>
         </article>
       </section>
@@ -126,7 +172,7 @@ export default function FaqPage() {
           <div className="flex flex-wrap gap-2">
             {categoryTabs.map((category) => {
               const isActive = selectedCategory === category;
-              const label = category === "all" ? "সব" : categoryLabelMap[category];
+              const label = category === "all" ? text.all : categoryLabelMap[category];
 
               return (
                 <button
@@ -148,7 +194,7 @@ export default function FaqPage() {
 
         {loading && (
           <div className="rounded-2xl border border-[#d6e2f5] bg-white/95 px-5 py-6 text-sm font-medium text-[#385175] shadow-[0_12px_35px_#193b6b12]">
-            FAQ তথ্য আনা হচ্ছে...
+            {text.fetching}
           </div>
         )}
 
@@ -160,7 +206,7 @@ export default function FaqPage() {
 
         {!loading && !error && visibleFaqs.length === 0 && (
           <div className="rounded-2xl border border-[#d6e2f5] bg-white/95 px-5 py-6 text-sm font-medium text-[#385175] shadow-[0_12px_35px_#193b6b12]">
-            এই ক্যাটাগরিতে এখনো কোনো FAQ যোগ করা হয়নি।
+            {text.empty}
           </div>
         )}
 
@@ -170,28 +216,29 @@ export default function FaqPage() {
               key={item.id}
               item={item}
               isOpen={openId === item.id}
+              categoryLabelMap={categoryLabelMap}
               onToggle={() => setOpenId((current) => (current === item.id ? null : item.id))}
             />
           ))}
       </section>
 
       <section className="relative mx-auto mt-6 w-full max-w-5xl rounded-3xl border border-[#d7e0f0] bg-white/92 p-5 shadow-[0_18px_40px_#193b6b14] md:mt-8 md:p-6">
-        <h2 className="text-lg font-bold text-[#122a5d]">আরও সাহায্য দরকার?</h2>
+        <h2 className="text-lg font-bold text-[#122a5d]">{text.needMoreHelp}</h2>
         <p className="mt-2 text-sm leading-relaxed text-[#3a4d67]">
-          আপনার প্রশ্নের উত্তর না পেলে রিপোর্ট ফিচার ব্যবহার করুন বা প্রোফাইল পেজ থেকে যোগাযোগের তথ্য আপডেট করে রাখুন।
+          {text.needMoreHelpDescription}
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
             href="/"
             className="inline-flex min-h-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#1f4fd7] to-[#173ea8] px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-[1px] hover:shadow-[0_10px_22px_#12295a36]"
           >
-            ম্যাপে যান
+            {text.mapCta}
           </Link>
           <Link
             href="/about"
             className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#cad6ec] bg-white px-4 py-2 text-sm font-semibold text-[#23324a] transition hover:-translate-y-[1px] hover:bg-[#f7faff]"
           >
-            About পেজে ফিরে যান
+            {text.aboutCta}
           </Link>
         </div>
       </section>

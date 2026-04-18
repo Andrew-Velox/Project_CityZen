@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { API_BASE_URL } from "@/config/api";
 import type { Report, ReportImageItem, ReportImageSlot } from "@/lib/api/types";
+import { useLanguage } from "@/components/i18n/language-context";
 
 type ReportModalImageSlot =
   | { kind: "existing"; id: number; url: string }
@@ -44,6 +45,7 @@ export default function ReportEditModal({
   onSubmit,
   onDelete,
 }: ReportEditModalProps) {
+  const { language } = useLanguage();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<"danger" | "help" | "warning" | "healthy">("warning");
@@ -51,6 +53,57 @@ export default function ReportEditModal({
   const [location, setLocation] = useState("");
   const [imageSlots, setImageSlots] = useState<ReportModalImageSlot[]>([]);
   const [hiddenBrokenUrls, setHiddenBrokenUrls] = useState<Set<string>>(new Set());
+
+  const text =
+    language === "bn"
+      ? {
+          title: "রিপোর্ট সম্পাদনা",
+          subtitle: "তথ্য আপডেট করুন বা সংযুক্ত মিডিয়া পরিচালনা করুন।",
+          reportTitle: "রিপোর্ট শিরোনাম",
+          description: "বিবরণ",
+          category: "ক্যাটাগরি",
+          danger: "বিপদ",
+          help: "সহায়তা প্রয়োজন",
+          warning: "সতর্কতা",
+          healthy: "নিরাপদ",
+          area: "এলাকা",
+          location: "লোকেশন কোঅর্ডিনেট",
+          mediaTitle: "সংযুক্ত মিডিয়া",
+          mediaSubtitle: "এই রিপোর্টে সর্বোচ্চ ৩টি ছবি আপলোড করুন।",
+          imageNotFound: "ছবি পাওয়া যায়নি",
+          replace: "বদলান",
+          remove: "সরান",
+          new: "নতুন",
+          addImage: "ছবি যোগ করুন",
+          deleteReport: "রিপোর্ট মুছুন",
+          cancel: "বাতিল",
+          saving: "সংরক্ষণ হচ্ছে...",
+          saveChanges: "পরিবর্তন সংরক্ষণ করুন",
+        }
+      : {
+          title: "Edit Report",
+          subtitle: "Update report information and manage attached media.",
+          reportTitle: "Report Title",
+          description: "Description",
+          category: "Category",
+          danger: "Danger",
+          help: "Need Help",
+          warning: "Warning",
+          healthy: "Safe",
+          area: "Area",
+          location: "Location Coordinates",
+          mediaTitle: "Attached Media",
+          mediaSubtitle: "Upload up to 3 images for this report.",
+          imageNotFound: "Image not available",
+          replace: "Replace",
+          remove: "Remove",
+          new: "New",
+          addImage: "Add Image",
+          deleteReport: "Delete Report",
+          cancel: "Cancel",
+          saving: "Saving...",
+          saveChanges: "Save Changes",
+        };
 
   function releasePreviewUrls(slots: ReportModalImageSlot[]) {
     slots.forEach((slot) => {
@@ -133,8 +186,8 @@ export default function ReportEditModal({
         {/* Sticky Header */}
         <header className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-slate-50/50 px-6 py-4 sm:px-8">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">রিপোর্ট সম্পাদনা</h2>
-            <p className="text-xs font-medium text-slate-500">তথ্য আপডেট করুন বা সংযুক্ত মিডিয়া পরিচালনা করুন।</p>
+            <h2 className="text-lg font-bold text-slate-900">{text.title}</h2>
+            <p className="text-xs font-medium text-slate-500">{text.subtitle}</p>
           </div>
           <button
             type="button"
@@ -174,7 +227,7 @@ export default function ReportEditModal({
           }}>
             
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">রিপোর্ট শিরোনাম</label>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">{text.reportTitle}</label>
               <input 
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" 
                 value={title} 
@@ -184,7 +237,7 @@ export default function ReportEditModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">বিবরণ</label>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">{text.description}</label>
               <textarea 
                 className="min-h-[100px] w-full resize-none rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" 
                 value={description} 
@@ -195,21 +248,21 @@ export default function ReportEditModal({
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700">ক্যাটাগরি</label>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">{text.category}</label>
                 <select
                   className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
                   value={category}
                   onChange={(e) => setCategory(e.target.value as any)}
                 >
-                  <option value="danger">বিপদ</option>
-                  <option value="help">সহায়তা প্রয়োজন</option>
-                  <option value="warning">সতর্কতা</option>
-                  <option value="healthy">নিরাপদ</option>
+                  <option value="danger">{text.danger}</option>
+                  <option value="help">{text.help}</option>
+                  <option value="warning">{text.warning}</option>
+                  <option value="healthy">{text.healthy}</option>
                 </select>
               </div>
               
               <div>
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700">এলাকা</label>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">{text.area}</label>
                 <input 
                   className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" 
                   value={area} 
@@ -220,7 +273,7 @@ export default function ReportEditModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">লোকেশন কোঅর্ডিনেট</label>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">{text.location}</label>
               <input 
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-500 outline-none" 
                 value={location} 
@@ -234,8 +287,8 @@ export default function ReportEditModal({
             <div className="pt-2">
               <div className="mb-3 flex items-end justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-700">সংযুক্ত মিডিয়া</h3>
-                  <p className="text-xs text-slate-500">এই রিপোর্টে সর্বোচ্চ ৩টি ছবি আপলোড করুন।</p>
+                  <h3 className="text-sm font-semibold text-slate-700">{text.mediaTitle}</h3>
+                  <p className="text-xs text-slate-500">{text.mediaSubtitle}</p>
                 </div>
                 <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
                   {imageSlots.length} / 3
@@ -261,14 +314,14 @@ export default function ReportEditModal({
                       ) : (
                         <div className="flex h-full flex-col items-center justify-center p-4 text-center">
                           <span className="text-2xl">⚠️</span>
-                          <p className="mt-1 text-[10px] font-medium text-slate-500">ছবি পাওয়া যায়নি</p>
+                          <p className="mt-1 text-[10px] font-medium text-slate-500">{text.imageNotFound}</p>
                         </div>
                       )}
 
                       {/* Hover Overlay Controls */}
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/40 opacity-0 backdrop-blur-[2px] transition-opacity duration-200 group-hover:opacity-100">
                         <label className="flex w-24 cursor-pointer items-center justify-center rounded-lg bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-white hover:scale-105 active:scale-95">
-                          বদলান
+                          {text.replace}
                           <input
                             type="file"
                             accept="image/*"
@@ -286,14 +339,14 @@ export default function ReportEditModal({
                           onClick={() => removeImageAt(index)}
                           disabled={busy}
                         >
-                          সরান
+                          {text.remove}
                         </button>
                       </div>
                       
                       {/* Badge indicator for new vs existing */}
                       {slot.kind === "new" && (
                         <span className="absolute left-2 top-2 rounded-md bg-blue-500 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white shadow-sm">
-                          নতুন
+                          {text.new}
                         </span>
                       )}
                     </div>
@@ -306,7 +359,7 @@ export default function ReportEditModal({
                     <svg className="mb-2 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    <span className="text-xs font-semibold">ছবি যোগ করুন</span>
+                    <span className="text-xs font-semibold">{text.addImage}</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -334,7 +387,7 @@ export default function ReportEditModal({
                 onClick={onDelete} 
                 disabled={busy}
               >
-                রিপোর্ট মুছুন
+                {text.deleteReport}
               </button>
             )}
           </div>
@@ -345,7 +398,7 @@ export default function ReportEditModal({
               onClick={onClose} 
               disabled={busy}
             >
-              বাতিল
+              {text.cancel}
             </button>
             <button 
               type="submit" 
@@ -353,7 +406,7 @@ export default function ReportEditModal({
               className="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-70" 
               disabled={busy}
             >
-              {busy ? "সংরক্ষণ হচ্ছে..." : "পরিবর্তন সংরক্ষণ করুন"}
+              {busy ? text.saving : text.saveChanges}
             </button>
           </div>
         </footer>

@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { refreshAccessToken } from "@/lib/api/auth";
 import { createReport, deleteReport, getReports, updateReport } from "@/lib/api/report";
 import { getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token-store";
@@ -19,6 +20,7 @@ const CityMapView = dynamic(() => import("@/components/home/city-map-view"), {
 });
 
 export function CityMapPanel() {
+  const router = useRouter();
   const [reports, setReports] = useState<Report[]>([]);
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
   const listPanelRef = useRef<HTMLDivElement | null>(null);
@@ -32,6 +34,8 @@ export function CityMapPanel() {
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [focusLocation, setFocusLocation] = useState<string | null>(null);
   const [focusRequestKey, setFocusRequestKey] = useState(0);
+  const [liveGpsLocation, setLiveGpsLocation] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Filters
   const [dateRangeFilter, setDateRangeFilter] = useState<"7d" | "30d" | "90d" | "all">("7d");
@@ -61,6 +65,19 @@ export function CityMapPanel() {
     setCreateError(null);
   };
 
+  const openCreateWithGpsPrefill = () => {
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+
+    resetForm();
+    if (liveGpsLocation) {
+      setForm((prev) => ({ ...prev, location: liveGpsLocation }));
+    }
+    setIsCreateModalOpen(true);
+  };
+
   // --- Data Fetching ---
 
   const loadReports = async () => {
@@ -77,6 +94,21 @@ export function CityMapPanel() {
   };
 
   useEffect(() => { loadReports(); }, []);
+
+  useEffect(() => {
+    const syncAuth = () => {
+      setIsAuthenticated(Boolean(getAccessToken()));
+    };
+
+    syncAuth();
+    window.addEventListener("storage", syncAuth);
+    window.addEventListener("focus", syncAuth);
+
+    return () => {
+      window.removeEventListener("storage", syncAuth);
+      window.removeEventListener("focus", syncAuth);
+    };
+  }, []);
 
   // --- Derived Data ---
 
@@ -286,7 +318,7 @@ export function CityMapPanel() {
       {/* Floating Action Button (FAB) - Integrated closer */}
       <div className="relative h-12 w-12 shrink-0">
         <button
-          onClick={() => { resetForm(); setIsCreateModalOpen(true); }}
+          onClick={openCreateWithGpsPrefill}
           aria-label="Create new report"
           className="group absolute inset-0 flex items-center justify-center rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-white shadow-[0_8px_16px_-4px_rgba(6,182,212,0.5)] transition-all duration-300 hover:scale-110 hover:shadow-[0_12px_20px_-4px_rgba(6,182,212,0.6)] active:scale-90"
         >
@@ -400,9 +432,13 @@ export function CityMapPanel() {
     >
       <CityMapView
         reports={filteredReports}
+        isAuthenticated={isAuthenticated}
         onLocationPick={(lat, lng) => {
           setForm(p => ({ ...p, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
           setIsCreateModalOpen(true);
+        }}
+        onLiveLocationUpdate={(lat, lng) => {
+          setLiveGpsLocation(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         }}
         onEditReport={(report) => { setEditError(null); setEditingReport(report); }}
         focusLocation={focusLocation}
