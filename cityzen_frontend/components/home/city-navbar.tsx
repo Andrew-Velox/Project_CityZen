@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getMyProfile, refreshAccessToken } from "@/lib/api/auth";
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token-store";
 import { ApiError } from "@/lib/api/types";
@@ -16,15 +16,22 @@ type NavbarUser = {
 export function CityNavbar() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isHomeRoute = pathname === "/";
   const navRef = useRef<HTMLElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const areaSearchRef = useRef<HTMLDivElement | null>(null);
+  const areaSearchInputRef = useRef<HTMLInputElement | null>(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<NavbarUser | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAreaSearchOpen, setIsAreaSearchOpen] = useState(false);
+  const [areaSearchInput, setAreaSearchInput] = useState("");
+
+  const activeAreaSearch = searchParams.get("areaSearch") || "";
 
   useEffect(() => {
     let mounted = true;
@@ -116,6 +123,10 @@ export function CityNavbar() {
       if (navRef.current && !navRef.current.contains(event.target as Node)) {
         setIsMobileMenuOpen(false);
       }
+      // Close area search
+      if (areaSearchRef.current && !areaSearchRef.current.contains(event.target as Node)) {
+        setIsAreaSearchOpen(false);
+      }
     }
 
     document.addEventListener("mousedown", onClickOutside);
@@ -128,6 +139,32 @@ export function CityNavbar() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    setAreaSearchInput(activeAreaSearch);
+  }, [activeAreaSearch]);
+
+  useEffect(() => {
+    if (isAreaSearchOpen) {
+      areaSearchInputRef.current?.focus();
+    }
+  }, [isAreaSearchOpen]);
+
+  function updateAreaSearchQuery(nextValue: string) {
+    if (!isHomeRoute) return;
+
+    const trimmedValue = nextValue.trim();
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (trimmedValue) {
+      params.set("areaSearch", trimmedValue);
+    } else {
+      params.delete("areaSearch");
+    }
+
+    const query = params.toString();
+    router.replace(query ? `/?${query}` : "/", { scroll: false });
+  }
 
   function handleLogout() {
     clearTokens();
@@ -182,6 +219,74 @@ export function CityNavbar() {
 
         {/* Right Section: Auth & Mobile Toggle */}
         <div className="flex items-center justify-end gap-2 sm:gap-3">
+          {isHomeRoute ? (
+            <div ref={areaSearchRef}>
+              <div
+                className={`flex items-center overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 ease-out ${
+                  isAreaSearchOpen
+                    ? "w-[12.5rem] border-[#c7d7ef] bg-gradient-to-r from-white/95 via-[#f8fbff]/95 to-[#eef5ff]/95 px-2.5 py-1.5 shadow-[0_14px_28px_#0f26501f] ring-1 ring-white/80 sm:w-[15rem]"
+                    : `w-10 border-[#c7d7ef99] p-0.5 shadow-[0_8px_18px_#0f265014] ${activeAreaSearch ? "bg-[#edf2fb] ring-1 ring-[#c8d7f2]" : "bg-white/70"}`
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsAreaSearchOpen(true)}
+                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition-all duration-300 ${
+                    isAreaSearchOpen || activeAreaSearch
+                      ? "bg-white text-[#1f4fd7] shadow-[0_6px_16px_#1f4fd726]"
+                      : "text-[#334155] hover:bg-[#edf2fb]"
+                  }`}
+                  aria-label="Open area search"
+                >
+                  <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="7" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </button>
+
+                <input
+                  ref={areaSearchInputRef}
+                  type="text"
+                  value={areaSearchInput}
+                  onChange={(event) => {
+                    const nextValue = event.target.value;
+                    setAreaSearchInput(nextValue);
+                    updateAreaSearchQuery(nextValue);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      setIsAreaSearchOpen(false);
+                    }
+                  }}
+                  className={`bg-transparent text-sm font-semibold text-[#334155] outline-none placeholder:text-[#64748b] transition-all duration-300 ${
+                    isAreaSearchOpen
+                      ? "ml-2 w-24 opacity-100 sm:w-36"
+                      : "ml-0 w-0 opacity-0 pointer-events-none"
+                  }`}
+                  placeholder="Search area"
+                  aria-label="Search area"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAreaSearchInput("");
+                    updateAreaSearchQuery("");
+                    setIsAreaSearchOpen(false);
+                  }}
+                  className={`grid shrink-0 place-items-center rounded-full text-[#64748b] transition-all duration-200 hover:bg-[#edf2fb] hover:text-[#1f4fd7] ${
+                    isAreaSearchOpen ? "ml-1 h-6 w-6 scale-100 opacity-100" : "h-0 w-0 scale-75 opacity-0 pointer-events-none"
+                  }`}
+                  aria-label="Close area search"
+                >
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M13 1L1 13M1 1l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ) : null}
+
           {isLoading ? (
             <div className="hidden md:block h-10 w-24 animate-pulse rounded-xl bg-[#e2e8f0]" />
           ) : !isLoggedIn ? (
