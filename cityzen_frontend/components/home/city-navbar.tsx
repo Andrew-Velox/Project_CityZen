@@ -30,6 +30,7 @@ export function CityNavbar() {
   const [isAreaSearchOpen, setIsAreaSearchOpen] = useState(false);
   const [activeAreaSearch, setActiveAreaSearch] = useState("");
   const [areaSearchInput, setAreaSearchInput] = useState("");
+  const [areaOptions, setAreaOptions] = useState<string[]>([]);
 
   function readAreaSearchFromUrl() {
     if (typeof window === "undefined") return "";
@@ -159,6 +160,30 @@ export function CityNavbar() {
   }, []);
 
   useEffect(() => {
+    const syncAreaOptions = (event: Event) => {
+      const customEvent = event as CustomEvent<string[]>;
+      const nextAreas = Array.isArray(customEvent.detail) ? customEvent.detail : [];
+      setAreaOptions(nextAreas);
+    };
+
+    const requestAreaOptions = () => {
+      window.dispatchEvent(new CustomEvent("cityzen:areas-request"));
+    };
+
+    window.addEventListener("cityzen:areas-update", syncAreaOptions as EventListener);
+    requestAreaOptions();
+
+    return () => {
+      window.removeEventListener("cityzen:areas-update", syncAreaOptions as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isAreaSearchOpen) return;
+    window.dispatchEvent(new CustomEvent("cityzen:areas-request"));
+  }, [isAreaSearchOpen]);
+
+  useEffect(() => {
     setAreaSearchInput(activeAreaSearch);
   }, [activeAreaSearch]);
 
@@ -171,22 +196,29 @@ export function CityNavbar() {
   function updateAreaSearchQuery(nextValue: string) {
     if (!isHomeRoute) return;
 
-    const trimmedValue = nextValue.trim();
     const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
 
-    if (trimmedValue) {
-      params.set("areaSearch", trimmedValue);
+    if (nextValue.length > 0) {
+      params.set("areaSearch", nextValue);
     } else {
       params.delete("areaSearch");
     }
 
     const query = params.toString();
-    router.replace(query ? `/?${query}` : "/", { scroll: false });
-    setActiveAreaSearch(trimmedValue);
+    if (typeof window !== "undefined") {
+      window.history.replaceState(window.history.state, "", query ? `/?${query}` : "/");
+    }
+    setActiveAreaSearch(nextValue);
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("cityzen:area-search-change"));
     }
   }
+
+  const normalizedInput = areaSearchInput.trim().toLowerCase();
+  const filteredAreaOptions = areaOptions.filter((area) => {
+    if (!normalizedInput) return true;
+    return area.toLowerCase().includes(normalizedInput);
+  });
 
   function handleLogout() {
     clearTokens();
@@ -242,12 +274,12 @@ export function CityNavbar() {
         {/* Right Section: Auth & Mobile Toggle */}
         <div className="flex items-center justify-end gap-2 sm:gap-3">
           {isHomeRoute ? (
-            <div ref={areaSearchRef}>
+            <div ref={areaSearchRef} className="relative shrink-0">
               <div
                 className={`flex items-center overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-300 ease-out ${
                   isAreaSearchOpen
-                    ? "w-[12.5rem] border-[#c7d7ef] bg-gradient-to-r from-white/95 via-[#f8fbff]/95 to-[#eef5ff]/95 px-2.5 py-1.5 shadow-[0_14px_28px_#0f26501f] ring-1 ring-white/80 sm:w-[15rem]"
-                    : `w-10 border-[#c7d7ef99] p-0.5 shadow-[0_8px_18px_#0f265014] ${activeAreaSearch ? "bg-[#edf2fb] ring-1 ring-[#c8d7f2]" : "bg-white/70"}`
+                    ? "w-[min(72vw,15rem)] border-[#c7d7ef] bg-gradient-to-r from-white/95 via-[#f8fbff]/95 to-[#eef5ff]/95 px-2.5 py-1.5 shadow-[0_14px_28px_#0f26501f] ring-1 ring-white/80"
+                    : `w-9 border-[#c7d7ef99] p-0.5 shadow-[0_8px_18px_#0f265014] sm:w-10 ${activeAreaSearch ? "bg-[#edf2fb] ring-1 ring-[#c8d7f2]" : "bg-white/70"}`
                 }`}
               >
                 <button
@@ -280,9 +312,9 @@ export function CityNavbar() {
                       setIsAreaSearchOpen(false);
                     }
                   }}
-                  className={`bg-transparent text-sm font-semibold text-[#334155] outline-none placeholder:text-[#64748b] transition-all duration-300 ${
+                  className={`min-w-0 bg-transparent text-sm font-semibold text-[#334155] outline-none placeholder:text-[#64748b] transition-all duration-300 ${
                     isAreaSearchOpen
-                      ? "ml-2 w-24 opacity-100 sm:w-36"
+                      ? "ml-2 flex-1 opacity-100"
                       : "ml-0 w-0 opacity-0 pointer-events-none"
                   }`}
                   placeholder="Search area"
@@ -306,6 +338,31 @@ export function CityNavbar() {
                   </svg>
                 </button>
               </div>
+
+              {isAreaSearchOpen ? (
+                <div className="absolute right-0 top-[calc(100%+0.55rem)] z-[3100] w-full min-w-[12.5rem] max-w-[calc(100vw-1.25rem)] overflow-hidden rounded-2xl border border-[#c9d7ed] bg-gradient-to-b from-white/95 to-[#f4f8ff]/95 shadow-[0_18px_34px_#12274a26] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200">
+                  <div className="max-h-52 overflow-y-auto py-1.5 sm:max-h-56">
+                    {filteredAreaOptions.length === 0 ? (
+                      <p className="px-3 py-2 text-xs font-medium text-[#64748b]">No matching area found</p>
+                    ) : (
+                      filteredAreaOptions.map((area) => (
+                        <button
+                          key={area}
+                          type="button"
+                          onClick={() => {
+                            setAreaSearchInput(area);
+                            updateAreaSearchQuery(area);
+                            setIsAreaSearchOpen(false);
+                          }}
+                          className="block w-full px-3 py-2.5 text-left text-sm font-semibold text-[#334155] transition hover:bg-[#edf3ff] hover:text-[#1f4fd7]"
+                        >
+                          {area}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              ) : null}
             </div>
           ) : null}
 

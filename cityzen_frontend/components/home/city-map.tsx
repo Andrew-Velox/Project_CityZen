@@ -135,6 +135,24 @@ export function CityMapPanel() {
     Array.from(new Set(reports.map((r) => r.area.trim()).filter(Boolean))).sort(),
   [reports]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const emitAreas = () => {
+      window.dispatchEvent(new CustomEvent("cityzen:areas-update", { detail: availableAreas }));
+    };
+
+    const onAreasRequest = () => {
+      emitAreas();
+    };
+
+    emitAreas();
+    window.addEventListener("cityzen:areas-request", onAreasRequest as EventListener);
+
+    return () => {
+      window.removeEventListener("cityzen:areas-request", onAreasRequest as EventListener);
+    };
+  }, [availableAreas]);
+
   const filteredReports = useMemo(() => {
     const now = Date.now();
     const ages = { "7d": 7, "30d": 30, "90d": 90, "all": null };
