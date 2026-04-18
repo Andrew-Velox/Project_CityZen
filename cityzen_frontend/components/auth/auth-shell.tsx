@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { useLanguage } from "@/components/providers/language-provider";
 
 type AuthShellProps = {
   title: string;
@@ -18,6 +19,8 @@ export function AuthShell({
   footerCtaLabel,
   footerHref,
 }: AuthShellProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="relative grid min-h-[calc(100dvh-5.5rem)] place-items-center overflow-hidden px-4 py-8">
       <main
@@ -38,6 +41,7 @@ export function AuthShell({
 
         <footer className="mt-6 text-[0.94rem] text-[#526079]">
           {footerText} <Link href={footerHref}>{footerCtaLabel}</Link>
+          <span className="sr-only">{t("ভাষা পরিবর্তন টপ ন্যাভবার থেকে করা যাবে", "Language can be switched from the top navbar")}</span>
         </footer>
       </main>
     </div>

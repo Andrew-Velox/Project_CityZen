@@ -7,8 +7,10 @@ import { ApiError } from "@/lib/api/types";
 import { setTokens } from "@/lib/auth/token-store";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { AuthFeedback } from "@/components/auth/auth-feedback";
+import { useLanguage } from "@/components/providers/language-provider";
 
 export default function LoginPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -32,9 +34,9 @@ export default function LoginPage() {
       router.push("/profile");
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.message || "Login failed. Check your credentials.");
+        setError(err.message || t("লগইন ব্যর্থ হয়েছে। তথ্য যাচাই করুন।", "Login failed. Check your credentials."));
       } else {
-        setError("Unexpected error while logging in.");
+        setError(t("লগইন করার সময় অপ্রত্যাশিত ত্রুটি হয়েছে।", "Unexpected error while logging in."));
       }
     } finally {
       setIsLoading(false);
@@ -43,14 +45,14 @@ export default function LoginPage() {
 
   return (
     <AuthShell
-      title="Welcome back"
-      subtitle="Log in to continue to your CityZen workspace."
-      footerText="No account yet?"
-      footerCtaLabel="Create one"
+      title={t("আবারও স্বাগতম", "Welcome back")}
+      subtitle={t("CityZen ওয়ার্কস্পেসে যেতে লগইন করুন।", "Log in to continue to your CityZen workspace.")}
+      footerText={t("এখনও অ্যাকাউন্ট নেই?", "No account yet?")}
+      footerCtaLabel={t("একটি তৈরি করুন", "Create one")}
       footerHref="/signup"
     >
       <form className="grid gap-4" onSubmit={onSubmit}>
-        <label htmlFor="username" className={labelClass}>Username</label>
+        <label htmlFor="username" className={labelClass}>{t("ইউজারনেম", "Username")}</label>
         <input
           id="username"
           name="username"
@@ -61,7 +63,7 @@ export default function LoginPage() {
           required
         />
 
-        <label htmlFor="password" className={labelClass}>Password</label>
+        <label htmlFor="password" className={labelClass}>{t("পাসওয়ার্ড", "Password")}</label>
         <input
           id="password"
           name="password"
@@ -76,7 +78,7 @@ export default function LoginPage() {
         {error ? <AuthFeedback type="error" message={error} /> : null}
 
         <button type="submit" disabled={isLoading} className={buttonClass}>
-          {isLoading ? "Signing in..." : "Sign in"}
+          {isLoading ? t("লগইন হচ্ছে...", "Signing in...") : t("লগইন", "Sign in")}
         </button>
       </form>
     </AuthShell>

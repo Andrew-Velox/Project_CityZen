@@ -5,8 +5,10 @@ import { signup } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/types";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { AuthFeedback } from "@/components/auth/auth-feedback";
+import { useLanguage } from "@/components/providers/language-provider";
 
 export default function SignupPage() {
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     username: "",
     first_name: "",
@@ -34,7 +36,7 @@ export default function SignupPage() {
 
     try {
       const response = await signup(form);
-      setSuccess(response.message || "Registration complete. Please check your email.");
+      setSuccess(response.message || t("রেজিস্ট্রেশন সম্পন্ন। অনুগ্রহ করে ইমেইল চেক করুন।", "Registration complete. Please check your email."));
       setForm({
         username: "",
         first_name: "",
@@ -45,9 +47,9 @@ export default function SignupPage() {
       });
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.message || "Registration failed.");
+        setError(err.message || t("রেজিস্ট্রেশন ব্যর্থ হয়েছে।", "Registration failed."));
       } else {
-        setError("Unexpected error while creating account.");
+        setError(t("অ্যাকাউন্ট তৈরির সময় অপ্রত্যাশিত ত্রুটি হয়েছে।", "Unexpected error while creating account."));
       }
     } finally {
       setIsLoading(false);
@@ -60,16 +62,16 @@ export default function SignupPage() {
 
   return (
     <AuthShell
-      title="Create your account"
-      subtitle="Join CityZen and start managing your urban insights."
-      footerText="Already registered?"
-      footerCtaLabel="Sign in"
+      title={t("আপনার অ্যাকাউন্ট তৈরি করুন", "Create your account")}
+      subtitle={t("CityZen-এ যোগ দিন এবং আপনার শহরের তথ্য ব্যবস্থাপনা শুরু করুন।", "Join CityZen and start managing your urban insights.")}
+      footerText={t("ইতিমধ্যে রেজিস্টার করেছেন?", "Already registered?")}
+      footerCtaLabel={t("লগইন", "Sign in")}
       footerHref="/login"
     >
       <form className="grid gap-4" onSubmit={onSubmit}>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label htmlFor="first_name" className={labelClass}>First name</label>
+            <label htmlFor="first_name" className={labelClass}>{t("নামের প্রথম অংশ", "First name")}</label>
             <input
               id="first_name"
               name="first_name"
@@ -82,7 +84,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="last_name" className={labelClass}>Last name</label>
+            <label htmlFor="last_name" className={labelClass}>{t("নামের শেষ অংশ", "Last name")}</label>
             <input
               id="last_name"
               name="last_name"
@@ -94,7 +96,7 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <label htmlFor="username" className={labelClass}>Username</label>
+        <label htmlFor="username" className={labelClass}>{t("ইউজারনেম", "Username")}</label>
         <input
           id="username"
           name="username"
@@ -105,7 +107,7 @@ export default function SignupPage() {
           required
         />
 
-        <label htmlFor="email" className={labelClass}>Email</label>
+        <label htmlFor="email" className={labelClass}>{t("ইমেইল", "Email")}</label>
         <input
           id="email"
           name="email"
@@ -119,7 +121,7 @@ export default function SignupPage() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label htmlFor="password" className={labelClass}>Password</label>
+            <label htmlFor="password" className={labelClass}>{t("পাসওয়ার্ড", "Password")}</label>
             <input
               id="password"
               name="password"
@@ -133,7 +135,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="confirm_password" className={labelClass}>Confirm password</label>
+            <label htmlFor="confirm_password" className={labelClass}>{t("পাসওয়ার্ড নিশ্চিত করুন", "Confirm password")}</label>
             <input
               id="confirm_password"
               name="confirm_password"
@@ -151,7 +153,7 @@ export default function SignupPage() {
         {success ? <AuthFeedback type="success" message={success} /> : null}
 
         <button type="submit" disabled={isLoading} className={buttonClass}>
-          {isLoading ? "Creating account..." : "Create account"}
+          {isLoading ? t("অ্যাকাউন্ট তৈরি হচ্ছে...", "Creating account...") : t("অ্যাকাউন্ট তৈরি করুন", "Create account")}
         </button>
       </form>
     </AuthShell>
