@@ -10,3 +10,4 @@ drf-spectacular
 Pillow
 channels
 daphne
+pypdf

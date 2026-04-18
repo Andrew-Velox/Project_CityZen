@@ -7,6 +7,11 @@ load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+RAG_CHUNK_SIZE = int(os.getenv("RAG_CHUNK_SIZE", "1200"))
+RAG_CHUNK_OVERLAP = int(os.getenv("RAG_CHUNK_OVERLAP", "180"))
+RAG_AUTO_PROCESS_ON_UPLOAD = os.getenv("RAG_AUTO_PROCESS_ON_UPLOAD", "True") == "True"
 
 
 # Quick-start development settings - unsuitable for production
@@ -65,6 +70,7 @@ INSTALLED_APPS = [
     'report_cz',
     'faq_cz',
     'community_cz.apps.CommunityCzConfig',
+    'rag_cz.apps.RagCzConfig',
 
 ]
 

@@ -211,6 +211,9 @@ export function CityNavbar() {
           <Link href="/faq" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
             {text.faq}
           </Link>
+          <Link href="/rag" className="font-semibold text-[#334155] transition hover:-translate-y-[1px] hover:text-[#1f4fd7]">
+            চ্যাটবট
+          </Link>
         </div>
 
         {/* Right Section: Auth & Mobile Toggle */}
@@ -338,6 +341,13 @@ export function CityNavbar() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {text.faq}
+              </Link>
+              <Link
+                href="/rag"
+                className="rounded-xl px-4 py-3 text-[0.95rem] font-semibold text-[#334155] transition hover:bg-[#edf2fb] hover:text-[#1f4fd7]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                চ্যাটবট
               </Link>
 
               {/* Show auth links in mobile menu if not logged in */}

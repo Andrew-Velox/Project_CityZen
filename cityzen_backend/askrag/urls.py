@@ -22,6 +22,7 @@ urlpatterns = [
     path('report/',include('report_cz.urls')),
     path('faq/',include('faq_cz.urls')),
     path('community/',include('community_cz.urls')),
+    path('rag/',include('rag_cz.urls')),
 
 ] 
 

@@ -365,6 +365,7 @@ export function CityMapPanel() {
       {/* AI Agent Button */}
       <button
         type="button"
+        onClick={() => router.push("/rag")}
         className="group relative flex flex-col items-center gap-1 transition-all"
       >
         <div className="rounded-xl p-2 text-slate-400 transition-all duration-300 group-hover:bg-white/40 group-hover:text-slate-600">

@@ -185,3 +185,32 @@ export type CommunityMessageCreateRequest = {
   voice_note?: File | null;
   duration?: number | null;
 };
+
+export type RagDocument = {
+  id: number;
+  user: string;
+  title: string;
+  file: string;
+  uploaded_at: string;
+  processed: boolean;
+  processing_error: string | null;
+  chunk_count: number;
+  file_size: number | null;
+  content_type: string | null;
+};
+
+export type RagQueryHistory = {
+  id: number;
+  user: string;
+  document: number | null;
+  query: string;
+  response: string;
+  created_at: string;
+  top_k: number;
+  latency_ms: number | null;
+};
+
+export type RagAskResponse = {
+  history: RagQueryHistory;
+  sources: string[];
+};
