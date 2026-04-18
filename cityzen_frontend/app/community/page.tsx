@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState, useRef } from "react";
 import {
   createCommunityGroup,
@@ -51,6 +52,7 @@ function buildGroupWsUrl(groupId: number, token: string) {
 }
 
 export default function CommunityPage() {
+  const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [groups, setGroups] = useState<CommunityGroup[]>([]);
   const [messages, setMessages] = useState<CommunityMessage[]>([]);
@@ -82,6 +84,11 @@ export default function CommunityPage() {
   }, [profile, selectedGroup]);
 
   const canCreateGroups = Boolean(profile?.is_staff);
+
+  function redirectToLogin() {
+    clearTokens();
+    router.replace("/login");
+  }
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -164,6 +171,15 @@ export default function CommunityPage() {
     let mounted = true;
     async function bootstrap() {
       setLoading(true);
+      const access = getAccessToken();
+      if (!access) {
+        if (mounted) {
+          redirectToLogin();
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
         await withAccessToken(async (token) => {
           const users = await getMyProfile(token);
@@ -175,7 +191,12 @@ export default function CommunityPage() {
           if (fetchedGroups.length > 0) setSelectedGroupId(fetchedGroups[0].id);
         });
       } catch (err) {
-        if (mounted) setError(err instanceof Error ? err.message : "Load failed.");
+        if (!mounted) return;
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+          redirectToLogin();
+          return;
+        }
+        setError(err instanceof Error ? err.message : "Load failed.");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -290,6 +311,10 @@ export default function CommunityPage() {
       loadGroups();
     } catch (err) { setError("Could not create group."); }
     finally { setCreatingGroup(false); }
+  }
+
+  if (!profile) {
+    return null;
   }
 
   async function onSend(e: FormEvent) {
@@ -437,7 +462,7 @@ export default function CommunityPage() {
                 <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-500" />
                 <p className="truncate text-sm font-bold text-slate-700">{profile?.username}</p>
               </div>
-              <button onClick={() => clearTokens()} className="text-slate-400 hover:text-red-500 transition-colors">
+              <button onClick={redirectToLogin} className="text-slate-400 hover:text-red-500 transition-colors">
                 <LogOut size={18} />
               </button>
             </div>

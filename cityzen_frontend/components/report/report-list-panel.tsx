@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { Report } from "@/lib/api/types";
+import { useLanguage } from "@/components/i18n/language-context";
 
 type ReportListPanelProps = {
   reports: Report[];
@@ -37,6 +38,27 @@ function getStatusColor(status: string) {
 }
 
 export default function ReportListPanel({ reports, loading, error, onReportClick }: ReportListPanelProps) {
+  const { language } = useLanguage();
+
+  const text =
+    language === "bn"
+      ? {
+          liveFeed: "লাইভ ফিড",
+          recentActivity: "সাম্প্রতিক কার্যক্রম",
+          reportCountSuffix: "টি রিপোর্ট",
+          feedLoadFailed: "ফিড লোড করা যায়নি",
+          noReports: "এখনও কোনো রিপোর্ট নেই",
+          noReportsDescription: "এই এলাকার কার্যক্রম এখানে দেখা যাবে।",
+        }
+      : {
+          liveFeed: "Live Feed",
+          recentActivity: "Recent Activity",
+          reportCountSuffix: "reports",
+          feedLoadFailed: "Failed to load feed",
+          noReports: "No reports yet",
+          noReportsDescription: "Activity for this area will appear here.",
+        };
+
   const sortedReports = useMemo(() => {
     return [...reports].sort((left, right) => {
       const leftTime = new Date(left.created_at).getTime();
@@ -58,15 +80,15 @@ export default function ReportListPanel({ reports, loading, error, onReportClick
               <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
             </span>
             <p className="font-mono text-xs font-semibold uppercase tracking-wider text-slate-500">
-              লাইভ ফিড
+              {text.liveFeed}
             </p>
           </div>
           <h3 className="mt-1.5 text-xl font-bold tracking-tight text-slate-900">
-            সাম্প্রতিক কার্যক্রম
+            {text.recentActivity}
           </h3>
         </div>
         <span className="flex h-7 items-center justify-center rounded-full border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 shadow-sm">
-          {sortedReports.length} টি রিপোর্ট
+          {sortedReports.length} {text.reportCountSuffix}
         </span>
       </div>
 
@@ -90,7 +112,7 @@ export default function ReportListPanel({ reports, loading, error, onReportClick
         ) : error ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-red-100 bg-red-50 py-10 text-center">
             <span className="mb-2 text-2xl">⚠️</span>
-            <h4 className="text-sm font-semibold text-red-800">ফিড লোড করা যায়নি</h4>
+            <h4 className="text-sm font-semibold text-red-800">{text.feedLoadFailed}</h4>
             <p className="mt-1 text-xs text-red-600">{error}</p>
           </div>
         ) : sortedReports.length === 0 ? (
@@ -98,8 +120,8 @@ export default function ReportListPanel({ reports, loading, error, onReportClick
             <svg className="mb-3 h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <h4 className="text-sm font-semibold text-slate-700">এখনও কোনো রিপোর্ট নেই</h4>
-            <p className="mt-1 text-xs text-slate-500">এই এলাকার কার্যক্রম এখানে দেখা যাবে।</p>
+            <h4 className="text-sm font-semibold text-slate-700">{text.noReports}</h4>
+            <p className="mt-1 text-xs text-slate-500">{text.noReportsDescription}</p>
           </div>
         ) : (
           <div className="max-h-[420px] space-y-4 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5">
