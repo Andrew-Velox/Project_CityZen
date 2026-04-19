@@ -27,3 +27,4 @@ python manage.py runserver 0.0.0.0:8000
     - [ ] Ai Agent model
     - [ ] Notification model
 - [ ] Frontend Feature Checklist
+    - [x] Add Framer Motion for animations

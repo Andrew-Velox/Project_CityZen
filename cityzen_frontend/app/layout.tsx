@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import { CityNavbar } from "@/components/home/city-navbar";
 import { LanguageProvider } from "@/components/providers/language-provider";
+import { ToastProvider } from "@/components/providers/toast-provider";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
@@ -45,6 +46,8 @@ export default function RootLayout({
             <CityNavbar />
             <div className="min-h-0 flex-1">{children}</div>
           </div>
+
+          <ToastProvider />
         </LanguageProvider>
       </body>
     </html>
