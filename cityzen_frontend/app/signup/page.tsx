@@ -6,8 +6,8 @@ import { login, signup } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/types";
 import { setTokens } from "@/lib/auth/token-store";
 import { AuthShell } from "@/components/auth/auth-shell";
-import { AuthFeedback } from "@/components/auth/auth-feedback";
 import { useLanguage } from "@/components/providers/language-provider";
+import { pushToast } from "@/lib/toast/events";
 
 export default function SignupPage() {
   const { t } = useLanguage();
@@ -22,8 +22,6 @@ export default function SignupPage() {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [returnPath, setReturnPath] = useState<string>("/profile");
 
   useEffect(() => {
@@ -70,8 +68,6 @@ export default function SignupPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
-    setSuccess(null);
     setIsLoading(true);
 
     try {
@@ -80,10 +76,12 @@ export default function SignupPage() {
       setTokens(auth.access, auth.refresh);
       router.replace(returnPath);
     } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message || t("রেজিস্ট্রেশন ব্যর্থ হয়েছে।", "Registration failed."));
-      } else {
-        setError(t("অ্যাকাউন্ট তৈরির সময় অপ্রত্যাশিত ত্রুটি হয়েছে।", "Unexpected error while creating account."));
+      if (!(err instanceof ApiError)) {
+        pushToast({
+          type: "error",
+          title: t("রেজিস্ট্রেশন ব্যর্থ", "Signup failed"),
+          message: t("অ্যাকাউন্ট তৈরির সময় অপ্রত্যাশিত ত্রুটি হয়েছে।", "Unexpected error while creating account."),
+        });
       }
     } finally {
       setIsLoading(false);
@@ -182,9 +180,6 @@ export default function SignupPage() {
             />
           </div>
         </div>
-
-        {error ? <AuthFeedback type="error" message={error} /> : null}
-        {success ? <AuthFeedback type="success" message={success} /> : null}
 
         <button type="submit" disabled={isLoading} className={buttonClass}>
           {isLoading ? t("অ্যাকাউন্ট তৈরি করে লগইন করা হচ্ছে...", "Creating account and signing in...") : t("অ্যাকাউন্ট তৈরি করুন", "Create account")}

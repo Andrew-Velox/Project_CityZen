@@ -1,4 +1,6 @@
 import { ApiError, type ApiErrorPayload } from "@/lib/api/types";
+import { extractApiErrorPayloadMessage } from "@/lib/api/error-utils";
+import { pushToast } from "@/lib/toast/events";
 import { API_BASE_URL } from "@/config/api";
 
 type RequestOptions = {
@@ -12,6 +14,7 @@ export async function apiRequest<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
+  const method = options.method || "GET";
   const isFormData = options.body instanceof FormData;
   const controller = new AbortController();
   const timeoutMs = options.timeoutMs ?? 12000;
@@ -32,7 +35,7 @@ export async function apiRequest<T>(
 
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
-      method: options.method || "GET",
+      method,
       headers: {
         ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
         ...(isFormData ? {} : { "Content-Type": "application/json" }),
@@ -42,8 +45,16 @@ export async function apiRequest<T>(
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
-      throw new ApiError(`Request timed out after ${Math.round(timeoutMs / 1000)}s`, 408, null);
+      const timeoutMessage = `Request timed out after ${Math.round(timeoutMs / 1000)}s`;
+      pushToast({ type: "error", title: "Request Failed", message: timeoutMessage });
+      throw new ApiError(timeoutMessage, 408, null);
     }
+
+    pushToast({
+      type: "error",
+      title: "Network Error",
+      message: "Could not connect to the server. Please check your internet connection.",
+    });
 
     throw error;
   } finally {
@@ -56,12 +67,30 @@ export async function apiRequest<T>(
     : null;
 
   if (!response.ok) {
-    const message =
-      (payload as ApiErrorPayload | null)?.detail ||
-      (payload as ApiErrorPayload | null)?.non_field_errors?.[0] ||
-      `Request failed with status ${response.status}`;
+    const message = extractApiErrorPayloadMessage(
+      (payload as ApiErrorPayload | null) || null,
+      `Request failed with status ${response.status}`,
+    );
+
+    pushToast({
+      type: "error",
+      title: "Request Failed",
+      message,
+    });
 
     throw new ApiError(message, response.status, (payload as ApiErrorPayload) || null);
+  }
+
+  const successPayload = payload as { message?: unknown; detail?: unknown } | null;
+  const successMessage =
+    typeof successPayload?.message === "string"
+      ? successPayload.message.trim()
+      : typeof successPayload?.detail === "string"
+        ? successPayload.detail.trim()
+        : "";
+
+  if (method !== "GET" && successMessage) {
+    pushToast({ type: "success", title: "Success", message: successMessage });
   }
 
   return payload as T;
