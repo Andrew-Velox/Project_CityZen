@@ -28,3 +28,4 @@ python manage.py runserver 0.0.0.0:8000
     - [ ] Notification model
 - [ ] Frontend Feature Checklist
     - [x] Add Framer Motion for animations
+    - [x] Add Lucide React for icons
