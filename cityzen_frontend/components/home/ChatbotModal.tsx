@@ -186,4 +186,5 @@ export default function ChatbotModal({ isOpen, onClose }: { isOpen: boolean; onC
     </div>,
     document.body
   );
+  
 }
