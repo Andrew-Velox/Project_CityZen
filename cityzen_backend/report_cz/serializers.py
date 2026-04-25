@@ -50,7 +50,7 @@ class ReportSerializer(serializers.ModelSerializer):
             return path
         return request.build_absolute_uri(path)
 
-    def get_author_image(self, obj):
+    def get_author_image(self, obj) -> str | None:
         image = getattr(obj.author, "image", None)
         if not image:
             return None
@@ -63,13 +63,13 @@ class ReportSerializer(serializers.ModelSerializer):
 
         return self._as_absolute_url(image.url)
 
-    def get_author_profile_url(self, obj):
+    def get_author_profile_url(self, obj) -> str | None:
         username = getattr(obj.author, "username", "")
         if not username:
             return None
         return f"/profile?user={username}"
 
-    def get_images(self, obj):
+    def get_images(self, obj) -> list[str]:
         urls = []
         for image in obj.images.all():
             if not image.image:
@@ -79,7 +79,7 @@ class ReportSerializer(serializers.ModelSerializer):
             urls.append(image.image.url)
         return urls
 
-    def get_image_items(self, obj):
+    def get_image_items(self, obj) -> list[dict]:
         items = []
         order = 1
 
@@ -209,7 +209,7 @@ class CommentSerializer(serializers.ModelSerializer):
             return path
         return request.build_absolute_uri(path)
 
-    def get_author_image(self, obj):
+    def get_author_image(self, obj) -> str | None:
         image = getattr(obj.author, "image", None)
         if not image:
             return None
@@ -222,7 +222,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
         return self._as_absolute_url(image.url)
 
-    def get_author_profile_url(self, obj):
+    def get_author_profile_url(self, obj) -> str | None:
         username = getattr(obj.author, "username", "")
         if not username:
             return None

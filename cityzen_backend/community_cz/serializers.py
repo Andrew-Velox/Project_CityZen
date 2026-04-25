@@ -29,7 +29,7 @@ class ChatGroupSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "admin", "admin_username", "banner_url", "created_at"]
 
-    def get_banner_url(self, obj):
+    def get_banner_url(self, obj) -> str | None:
         if not obj.banner:
             return None
 
@@ -88,17 +88,17 @@ class GroupMessageSerializer(serializers.ModelSerializer):
             "is_image",
         ]
 
-    def get_seen_count(self, obj):
+    def get_seen_count(self, obj) -> int:
         return obj.seen_by.count()
 
-    def get_is_seen_by_me(self, obj):
+    def get_is_seen_by_me(self, obj) -> bool:
         request = self.context.get("request")
         user = getattr(request, "user", None)
         if not user or not user.is_authenticated:
             return False
         return obj.seen_by.filter(pk=user.pk).exists()
 
-    def get_author_image(self, obj):
+    def get_author_image(self, obj) -> str | None:
         image = getattr(obj.author, "image", None)
         if not image:
             return None
@@ -114,7 +114,7 @@ class GroupMessageSerializer(serializers.ModelSerializer):
             return image.url
         return request.build_absolute_uri(image.url)
 
-    def get_author_profile_url(self, obj):
+    def get_author_profile_url(self, obj) -> str | None:
         username = getattr(obj.author, "username", "")
         if not username:
             return None

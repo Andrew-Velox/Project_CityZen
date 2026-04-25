@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'user_cs.apps.UserCsConfig',
     'report_cz',
     'faq_cz',
+    'rag_service',
     'community_cz.apps.CommunityCzConfig',
 
 ]

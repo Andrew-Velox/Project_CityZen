@@ -8,7 +8,8 @@ import { createReport, deleteReport, getReports, updateReport } from "@/lib/api/
 import { getAccessToken, getRefreshToken, setTokens } from "@/lib/auth/token-store";
 import { ApiError, type Report } from "@/lib/api/types";
 import ReportEditModal, { type ReportEditSubmitPayload } from "@/components/report/report-edit-modal";
-
+// Make sure to adjust the import path to where you saved the ChatbotModal component
+import ChatbotModal from "./ChatbotModal";
 const CityMapView = dynamic(() => import("@/components/home/city-map-view"), {
   ssr: false,
   loading: () => (
@@ -25,7 +26,7 @@ export function CityMapPanel() {
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
   const listPanelRef = useRef<HTMLDivElement | null>(null);
   const [areaSearchQuery, setAreaSearchQuery] = useState("");
-  
+  const [isChatOpen, setIsChatOpen] = useState(false);
   // States
   const [loadingReports, setLoadingReports] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -384,6 +385,7 @@ export function CityMapPanel() {
       {/* AI Agent Button */}
       <button
         type="button"
+        onClick={() => setIsChatOpen(true)}
         className="group relative flex flex-col items-center gap-1 transition-all"
       >
         <div className="rounded-xl p-2 text-slate-400 transition-all duration-300 group-hover:bg-white/40 group-hover:text-slate-600">
@@ -400,6 +402,12 @@ export function CityMapPanel() {
           Agent
         </span>
       </button>
+
+      {/* The Chatbot Modal Component */}
+      <ChatbotModal 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+      />
       
     </div>
   );

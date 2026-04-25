@@ -10,3 +10,7 @@ drf-spectacular
 Pillow
 channels
 daphne
+# langchain_groq
+# langchain==0.3.13
+# langchain_huggingface
+# langchain_community
